@@ -1,0 +1,14 @@
+version: '3.8'
+
+services:
+  vps-monitor:
+    build: .
+    container_name: vps-monitor
+    restart: unless-stopped
+    # Use the host's PID namespace so 'ps' can see all host processes.
+    pid: host
+    # Use the host's network namespace to monitor host network interfaces and bind directly to port 8080.
+    network_mode: host
+    environment:
+      # Pass your pre-generated hash here or in a .env file next to this docker-compose.yml
+      - MONITOR_PASS_HASH=${MONITOR_PASS_HASH}

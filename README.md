@@ -1,6 +1,14 @@
+<p align="center">
+  <img src="misc/logo.png" width="200" alt="VPS Monitor Logo">
+</p>
+
 # VPS Monitor
 
 Lightweight system monitor for Linux VPS. Single Go binary, ~5MB RAM usage.
+
+<p align="center">
+  <img src="misc/screenshot.png" width="800" alt="VPS Monitor Screenshot">
+</p>
 
 Monitors CPU, memory, swap, disk, network, uptime, and process count. Web UI with login, auto-refreshes every 5 seconds.
 
