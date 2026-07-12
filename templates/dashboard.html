@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>VPS Monitor</title>
+<style>
+:root{--bg:#0f172a;--text:#e2e8f0;--card:#1e293b;--muted:#94a3b8;--border:#334155;--table-border:#1e293b;--primary:#38bdf8;--bar-bg:#334155;}
+[data-theme="light"]{--bg:#f8fafc;--text:#0f172a;--card:#ffffff;--muted:#64748b;--border:#cbd5e1;--table-border:#e2e8f0;--bar-bg:#e2e8f0;--primary:#0284c7;}
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;background:var(--bg);color:var(--text);padding:1.5rem;transition:background .3s,color .3s}
+.header{display:flex;justify-content:space-between;align-items:center;margin-bottom:1.5rem}
+h1{font-size:1.4rem;color:var(--primary)}
+.hostname{color:var(--muted);font-size:.9rem}
+.controls{display:flex;align-items:center}
+.theme-switch{background:none;border:none;color:var(--muted);cursor:pointer;font-size:1.2rem;margin-right:1rem;display:flex;align-items:center;transition:color .2s}
+.theme-switch:hover{color:var(--text)}
+.logout{color:var(--muted);text-decoration:none;font-size:.85rem;padding:.4rem .8rem;border:1px solid var(--border);border-radius:6px;transition:all .2s}
+.logout:hover{color:var(--text);border-color:var(--muted)}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:1rem}
+.card{background:var(--card);border-radius:10px;padding:1.25rem;transition:background .3s;box-shadow:0 4px 6px -1px rgba(0,0,0,.05)}
+.card h2{font-size:.85rem;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;margin-bottom:1rem}
+.metric{display:flex;justify-content:space-between;align-items:center;margin-bottom:.75rem}
+.metric:last-child{margin-bottom:0}
+.label{color:var(--muted);font-size:.9rem}
+.value{font-size:.95rem;font-weight:600;font-variant-numeric:tabular-nums}
+.bar-wrap{width:100%;height:8px;background:var(--bar-bg);border-radius:4px;margin-top:.35rem;transition:background .3s}
+.bar{height:100%;border-radius:4px;transition:width .5s ease}
+.bar.green{background:#22c55e}
+.bar.yellow{background:#eab308}
+.bar.red{background:#ef4444}
+.sparkline{width:100%;height:50px;margin-top:1.25rem;display:block;overflow:visible}
+.wide{grid-column:1/-1}
+table{width:100%;border-collapse:collapse;font-size:.85rem}
+th{text-align:left;color:var(--muted);font-weight:500;padding:.5rem 0;border-bottom:1px solid var(--border)}
+td{padding:.5rem 0;border-bottom:1px solid var(--table-border)}
+.updated{text-align:center;color:var(--muted);font-size:.75rem;margin-top:1rem}
+.disconnected{background:#ef4444;color:white;text-align:center;padding:0.5rem;border-radius:6px;margin-bottom:1rem;display:none}
+</style>
+<script>
+function setTheme(theme) {
+  document.documentElement.setAttribute('data-theme', theme);
+  localStorage.setItem('theme', theme);
+  const btn = document.getElementById('theme-btn');
+  if(btn) btn.textContent = theme === 'light' ? '🌙' : '☀️';
+}
+function toggleTheme() {
+  const cur = document.documentElement.getAttribute('data-theme');
+  setTheme(cur === 'light' ? 'dark' : 'light');
+}
+const savedTheme = localStorage.getItem('theme') || (window.matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark');
+setTheme(savedTheme);
+</script>
+</head>
+<body>
+<div id="offline-banner" class="disconnected">Disconnected / Reconnecting...</div>
+<div class="header">
+<div><h1>VPS Monitor</h1><span class="hostname" id="hostname"></span></div>
+<div class="controls">
+<button class="theme-switch" id="theme-btn" onclick="toggleTheme()" title="Toggle Theme">☀️</button>
+<a href="/logout" class="logout">Logout</a>
+</div>
+</div>
+<div class="grid">
+<div class="card">
+<h2>CPU</h2>
+<div class="metric"><span class="label">Usage</span><span class="value" id="cpu-usage">--</span></div>
+<div class="bar-wrap"><div class="bar" id="cpu-bar"></div></div>
+<div class="metric" style="margin-top:.75rem"><span class="label">Cores</span><span class="value" id="cpu-cores">--</span></div>
+<div class="metric"><span class="label">Load Average</span><span class="value" id="load-avg">--</span></div>
+<svg class="sparkline" id="cpu-chart"></svg>
+<div style="margin-top: 1rem;">
+  <h3 style="font-size: 0.75rem; color: var(--muted); margin-bottom: 0.5rem; text-transform: uppercase;">Top CPU</h3>
+  <table style="font-size: 0.8rem; width: 100%;"><tbody id="top-cpu"></tbody></table>
+</div>
+</div>
+<div class="card">
+<h2>Memory</h2>
+<div class="metric"><span class="label">Used / Total</span><span class="value" id="mem-usage">--</span></div>
+<div class="bar-wrap"><div class="bar" id="mem-bar"></div></div>
+<div class="metric" style="margin-top:.75rem"><span class="label">Swap</span><span class="value" id="swap-usage">--</span></div>
+<div class="bar-wrap"><div class="bar" id="swap-bar"></div></div>
+<svg class="sparkline" id="mem-chart"></svg>
+<div style="margin-top: 1rem;">
+  <h3 style="font-size: 0.75rem; color: var(--muted); margin-bottom: 0.5rem; text-transform: uppercase;">Top Memory</h3>
+  <table style="font-size: 0.8rem; width: 100%;"><tbody id="top-mem"></tbody></table>
+</div>
+</div>
+<div class="card">
+<h2>System</h2>
+<div class="metric"><span class="label">Uptime</span><span class="value" id="uptime">--</span></div>
+<div class="metric"><span class="label">Processes</span><span class="value" id="procs">--</span></div>
+<div class="metric"><span class="label" style="color:var(--primary)">Network RX</span><span class="value" id="net-rx">--</span></div>
+<div class="metric"><span class="label" style="color:#22c55e">Network TX</span><span class="value" id="net-tx">--</span></div>
+<svg class="sparkline" id="net-chart"></svg>
+</div>
+<div class="card wide">
+<h2>Disks</h2>
+<table>
+<thead><tr><th>Device</th><th>Mount</th><th>Used</th><th>Free</th><th>Total</th><th style="width:30%">Usage</th></tr></thead>
+<tbody id="disk-table"></tbody>
+</table>
+</div>
+</div>
+<div class="updated">Last updated: <span id="updated">--</span></div>
+<script>
+function fmt(bytes){
+  if(bytes===0)return"0 B";
+  const k=1024,s=["B","KB","MB","GB","TB"];
+  const i=Math.floor(Math.log(bytes)/Math.log(k));
+  return(bytes/Math.pow(k,i)).toFixed(1)+" "+s[i];
+}
+function barClass(pct){return pct>90?"red":pct>70?"yellow":"green"}
+function setBar(id,pct){
+  const el=document.getElementById(id);
+  el.style.width=Math.min(pct,100)+"%";
+  el.className="bar "+barClass(pct);
+}
+function drawSparkline(svgId, data, color) {
+    const svg = document.getElementById(svgId);
+    if (!data || data.length < 2) return;
+    const w = 300, h = 50;
+    const max = Math.max(...data) || 1;
+    const pts = data.map((val, i) => `${(i / (data.length - 1)) * w},${h - (val / max) * h}`).join(" ");
+    svg.setAttribute("viewBox", `0 0 ${w} ${h}`);
+    svg.setAttribute("preserveAspectRatio", "none");
+    svg.innerHTML = `<polyline fill="none" stroke="${color}" stroke-width="2" vector-effect="non-scaling-stroke" points="${pts}" />`;
+}
+function renderTop(id, procs, isMem) {
+    const tbody = document.getElementById(id);
+    if (!procs || procs.length === 0) {
+        tbody.innerHTML = "<tr><td colspan='2' style='color:var(--muted); text-align:center;'>N/A</td></tr>";
+        return;
+    }
+    tbody.innerHTML = procs.map(p => `
+        <tr>
+            <td style="padding: 0.2rem 0; border: none; max-width: 150px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;" title="${p.name}">${p.name}</td>
+            <td style="padding: 0.2rem 0; border: none; text-align: right; font-weight: 600;">${(isMem ? p.mem : p.cpu).toFixed(1)}%</td>
+        </tr>
+    `).join("");
+}
+function drawDualSparkline(svgId, data1, data2, color1, color2) {
+    const svg = document.getElementById(svgId);
+    if (!data1 || data1.length < 2) return;
+    const w = 300, h = 50;
+    const max = Math.max(...data1, ...data2) || 1;
+    const pts1 = data1.map((val, i) => `${(i / (data1.length - 1)) * w},${h - (val / max) * h}`).join(" ");
+    const pts2 = data2.map((val, i) => `${(i / (data2.length - 1)) * w},${h - (val / max) * h}`).join(" ");
+    svg.setAttribute("viewBox", `0 0 ${w} ${h}`);
+    svg.setAttribute("preserveAspectRatio", "none");
+    svg.innerHTML = `<polyline fill="none" stroke="${color1}" stroke-width="2" vector-effect="non-scaling-stroke" points="${pts1}" />
+                     <polyline fill="none" stroke="${color2}" stroke-width="2" vector-effect="non-scaling-stroke" points="${pts2}" />`;
+}
+
+async function refresh(){
+  try{
+    const r=await fetch("/api/metrics");
+    if(r.status===401){window.location="/login";return}
+    document.getElementById("offline-banner").style.display = "none";
+    
+    const history=await r.json();
+    if(history.length === 0) return;
+    
+    const d = history[history.length-1];
+    
+    document.getElementById("hostname").textContent=d.hostname;
+    document.getElementById("cpu-usage").textContent=d.cpu_usage.toFixed(1)+"%";
+    setBar("cpu-bar",d.cpu_usage);
+    document.getElementById("cpu-cores").textContent=d.cpu_count;
+    document.getElementById("load-avg").textContent=d.load_avg;
+    document.getElementById("mem-usage").textContent=fmt(d.mem_used)+" / "+fmt(d.mem_total);
+    setBar("mem-bar",d.mem_percent);
+    
+    if(d.swap_total>0){
+      document.getElementById("swap-usage").textContent=fmt(d.swap_used)+" / "+fmt(d.swap_total)+" ("+d.swap_percent.toFixed(1)+"%)";
+      setBar("swap-bar",d.swap_percent);
+    }else{
+      document.getElementById("swap-usage").textContent="None";
+    }
+    
+    document.getElementById("uptime").textContent=d.uptime;
+    document.getElementById("procs").textContent=d.processes;
+    document.getElementById("net-rx").textContent=fmt(d.net_rx) + " (" + fmt(d.net_rx_speed) + "/s)";
+    document.getElementById("net-tx").textContent=fmt(d.net_tx) + " (" + fmt(d.net_tx_speed) + "/s)";
+    
+    renderTop("top-cpu", d.top_cpu, false);
+    renderTop("top-mem", d.top_mem, true);
+    
+    const tbody=document.getElementById("disk-table");
+    tbody.innerHTML="";
+    (d.disks||[]).forEach(dk=>{
+      const tr=document.createElement("tr");
+      tr.innerHTML="<td>"+dk.device+"</td><td>"+dk.mount+"</td><td>"+fmt(dk.used)+"</td><td>"+fmt(dk.free)+"</td><td>"+fmt(dk.total)+'</td><td><div class="bar-wrap"><div class="bar '+barClass(dk.percent)+'" style="width:'+dk.percent.toFixed(0)+'%"></div></div> '+dk.percent.toFixed(1)+"%</td>";
+      tbody.appendChild(tr);
+    });
+    
+    document.getElementById("updated").textContent=new Date(d.timestamp).toLocaleTimeString();
+    
+    const style = getComputedStyle(document.documentElement);
+    const pColor = style.getPropertyValue('--primary').trim();
+    drawSparkline("cpu-chart", history.map(m => m.cpu_usage), pColor);
+    drawSparkline("mem-chart", history.map(m => m.mem_percent), "#8b5cf6");
+    drawDualSparkline("net-chart", history.map(m => m.net_rx_speed), history.map(m => m.net_tx_speed), pColor, "#22c55e");
+    
+  }catch(e){
+    console.error(e);
+    document.getElementById("offline-banner").style.display = "block";
+  }
+}
+refresh();
+setInterval(refresh,5000);
+</script>
+</body>
+</html>

@@ -75,7 +75,9 @@ echo "    Built: ${BINARY} ($(du -h "${SCRIPT_DIR}/${BINARY}" | cut -f1))"
 echo ""
 echo "==> [2/4] Uploading binary to VPS..."
 ${SSH_CMD} "mkdir -p ${REMOTE_DIR}"
-${SCP_CMD} "${SCRIPT_DIR}/${BINARY}" "${SSH_USER}@${VPS_HOST}:${REMOTE_DIR}/${APP_NAME}"
+# Upload to a .tmp file first and move it to avoid "Text file busy" errors when updating
+${SCP_CMD} "${SCRIPT_DIR}/${BINARY}" "${SSH_USER}@${VPS_HOST}:${REMOTE_DIR}/${APP_NAME}.tmp"
+${SSH_CMD} "mv -f ${REMOTE_DIR}/${APP_NAME}.tmp ${REMOTE_DIR}/${APP_NAME}"
 echo "    Uploaded to ${VPS_HOST}:${REMOTE_DIR}/${APP_NAME}"
 
 # ─── Step 3: Setup on VPS ────────────────────
@@ -101,10 +103,11 @@ chmod 755 "${REMOTE_DIR}/${APP_NAME}"
 chown "${SERVICE_USER}:${SERVICE_GROUP}" "${REMOTE_DIR}/${APP_NAME}"
 
 # Create env file with credentials (readable only by service user)
+PASS_HASH=\$("${REMOTE_DIR}/${APP_NAME}" -hash "${MON_PASS}")
 cat > "${REMOTE_DIR}/.env" <<ENVEOF
 MONITOR_ADDR=:8088
 MONITOR_USER=${MON_USER}
-MONITOR_PASS=${MON_PASS}
+MONITOR_PASS_HASH=\${PASS_HASH}
 ENVEOF
 chmod 600 "${REMOTE_DIR}/.env"
 chown "${SERVICE_USER}:${SERVICE_GROUP}" "${REMOTE_DIR}/.env"

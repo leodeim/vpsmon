@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Login - VPS Monitor</title>
+<style>
+:root{--bg:#0f172a;--text:#e2e8f0;--card:#1e293b;--primary:#38bdf8;--input-bg:#0f172a;--border:#334155;--btn-hover:#7dd3fc;}
+[data-theme="light"]{--bg:#f8fafc;--text:#0f172a;--card:#ffffff;--primary:#0284c7;--input-bg:#ffffff;--border:#cbd5e1;--btn-hover:#0ea5e9;}
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;background:var(--bg);color:var(--text);display:flex;align-items:center;justify-content:center;min-height:100vh;transition:background .3s,color .3s}
+.card{background:var(--card);border-radius:12px;padding:2rem;width:100%;max-width:380px;box-shadow:0 4px 24px rgba(0,0,0,.1);transition:background .3s}
+h1{font-size:1.4rem;margin-bottom:1.5rem;text-align:center;color:var(--primary)}
+input{width:100%;padding:.75rem 1rem;margin-bottom:1rem;border:1px solid var(--border);border-radius:8px;background:var(--input-bg);color:var(--text);font-size:.95rem;transition:border-color .2s}
+input:focus{outline:none;border-color:var(--primary)}
+button{width:100%;padding:.75rem;border:none;border-radius:8px;background:var(--primary);color:#fff;font-size:1rem;font-weight:600;cursor:pointer;transition:background .2s}
+button:hover{background:var(--btn-hover)}
+</style>
+<script>
+const savedTheme = localStorage.getItem('theme') || (window.matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark');
+document.documentElement.setAttribute('data-theme', savedTheme);
+</script>
+</head>
+<body>
+<div class="card">
+<h1>VPS Monitor</h1>
+<form method="post" action="/login">
+<input type="text" name="username" placeholder="Username" required autofocus>
+<input type="password" name="password" placeholder="Password" required>
+<button type="submit">Login</button>
+</form>
+</div>
+</body>
+</html>
