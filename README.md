@@ -1,13 +1,13 @@
 <p align="center">
-  <img src="misc/logo.png" width="200" alt="VPS Monitor Logo">
+  <img src="misc/logo.png" width="200" alt="vpsmon Logo">
 </p>
 
-# VPS Monitor
+# vpsmon
 
 Lightweight system monitor for Linux VPS. Single Go binary, ~5MB RAM usage.
 
 <p align="center">
-  <img src="misc/screenshot.png" width="800" alt="VPS Monitor Screenshot">
+  <img src="misc/screenshot.png" width="800" alt="vpsmon Screenshot">
 </p>
 
 Monitors CPU, memory, swap, disk, network, uptime, and process count. Web UI with login, auto-refreshes every 5 seconds.
@@ -35,5 +35,5 @@ For security, the password is not stored in plaintext. You must provide a bcrypt
 If you need to generate a hash manually, you can run the binary with the `-hash` flag:
 
 ```bash
-./vps-monitor -hash "my_secure_password"
+./vpsmon -hash "my_secure_password"
 ```

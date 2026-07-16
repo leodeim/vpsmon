@@ -37,13 +37,13 @@ jobs:
           GOOS: ${{ matrix.goos }}
           GOARCH: ${{ matrix.goarch }}
         run: |
-          CGO_ENABLED=0 go build -ldflags="-s -w" -o vps-monitor-${{ matrix.goos }}-${{ matrix.goarch }} .
+          CGO_ENABLED=0 go build -ldflags="-s -w" -o vpsmon-${{ matrix.goos }}-${{ matrix.goarch }} .
 
       - name: Upload Artifact
         uses: actions/upload-artifact@v4
         with:
-          name: vps-monitor-${{ matrix.goos }}-${{ matrix.goarch }}
-          path: vps-monitor-${{ matrix.goos }}-${{ matrix.goarch }}
+          name: vpsmon-${{ matrix.goos }}-${{ matrix.goarch }}
+          path: vpsmon-${{ matrix.goos }}-${{ matrix.goarch }}
 
   release:
     name: Create GitHub Release

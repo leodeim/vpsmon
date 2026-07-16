@@ -7,7 +7,7 @@ RUN go mod download
 
 COPY . .
 # Build a static binary
-RUN CGO_ENABLED=0 GOOS=linux go build -ldflags="-s -w" -o vps-monitor .
+RUN CGO_ENABLED=0 GOOS=linux go build -ldflags="-s -w" -o vpsmon .
 
 # Stage 2: Create the minimal runtime image
 FROM alpine:latest
@@ -18,8 +18,8 @@ WORKDIR /app
 # The busybox 'ps' does not support the flags we need.
 RUN apk add --no-cache procps
 
-COPY --from=builder /app/vps-monitor .
+COPY --from=builder /app/vpsmon .
 
 EXPOSE 8080
 
-CMD ["./vps-monitor"]
+CMD ["./vpsmon"]

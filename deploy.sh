@@ -2,22 +2,22 @@
 set -euo pipefail
 
 # ─────────────────────────────────────────────
-# VPS Monitor - Full Deploy Script
+# VPSmon - Full Deploy Script
 # Builds locally, uploads to VPS, installs as
 # a systemd service. Run from project root.
 # ─────────────────────────────────────────────
 
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
-APP_NAME="vps-monitor"
-BINARY="vps-monitor"
-REMOTE_DIR="/opt/vps-monitor"
+APP_NAME="vpsmon"
+BINARY="vpsmon"
+REMOTE_DIR="/opt/vpsmon"
 SERVICE_USER="vpsmon"
 SERVICE_GROUP="vpsmon"
 
 # ─── Gather input ────────────────────────────
 
 echo "═══════════════════════════════════════"
-echo "  VPS Monitor - Deploy"
+echo "  VPSmon - Deploy"
 echo "═══════════════════════════════════════"
 echo ""
 
@@ -116,7 +116,7 @@ echo "    Created env file"
 # Create systemd service
 cat > "/etc/systemd/system/${APP_NAME}.service" <<SVCEOF
 [Unit]
-Description=VPS Monitor
+Description=VPSmon
 After=network.target
 
 [Service]

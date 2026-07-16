@@ -99,7 +99,7 @@ func startServer(listenAddr, username, expectedPassHash string) {
 		json.NewEncoder(w).Encode(getMetricsHistory())
 	})
 
-	log.Printf("VPS Monitor starting on %s", listenAddr)
+	log.Printf("vpsmon starting on %s", listenAddr)
 	if err := http.ListenAndServe(listenAddr, mux); err != nil {
 		log.Fatal(err)
 	}

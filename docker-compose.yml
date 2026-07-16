@@ -1,9 +1,9 @@
 version: '3.8'
 
 services:
-  vps-monitor:
+  vpsmon:
     build: .
-    container_name: vps-monitor
+    container_name: vpsmon
     restart: unless-stopped
     # Use the host's PID namespace so 'ps' can see all host processes.
     pid: host

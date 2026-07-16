@@ -1,4 +1,4 @@
-module vps-monitor
+module vpsmon
 
 go 1.25.0
 
