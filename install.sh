@@ -33,7 +33,7 @@ case $ARCH in
 esac
 
 echo "==> Fetching latest release info for ${REPO}..."
-LATEST_RELEASE_URL=$(curl -s "https://api.github.com/repos/${REPO}/releases/latest" | grep '"browser_download_url":' | grep "linux-${GOARCH}" | cut -d '"' -f 4 | head -n 1)
+LATEST_RELEASE_URL=$(curl -s "https://api.github.com/repos/${REPO}/releases/latest" | grep '"browser_download_url":' | grep "linux-${GOARCH}" | cut -d '"' -f 4 | head -n 1 || true)
 
 if [ -z "$LATEST_RELEASE_URL" ]; then
     echo "Error: Could not find a binary for linux-${GOARCH} in the latest release."
@@ -42,6 +42,9 @@ if [ -z "$LATEST_RELEASE_URL" ]; then
 fi
 
 echo "── Configuration ──────────────────────"
+read -rp "Monitor port [8088]: " MON_PORT </dev/tty
+MON_PORT="${MON_PORT:-8088}"
+
 read -rp "Monitor username [admin]: " MON_USER </dev/tty
 MON_USER="${MON_USER:-admin}"
 while true; do
@@ -84,7 +87,7 @@ echo "==> Generating credentials..."
 PASS_HASH=$("${REMOTE_DIR}/${APP_NAME}" -hash "${MON_PASS}")
 
 cat > "${REMOTE_DIR}/.env" <<ENVEOF
-MONITOR_ADDR=:8088
+MONITOR_ADDR=:${MON_PORT}
 MONITOR_USER=${MON_USER}
 MONITOR_PASS_HASH=${PASS_HASH}
 ENVEOF
@@ -134,7 +137,7 @@ echo ""
 echo "═══════════════════════════════════════"
 echo "  VPSmon installed successfully!"
 echo ""
-echo "  URL:     http://<your-vps-ip>:8088"
+echo "  URL:     http://<your-vps-ip>:${MON_PORT}"
 echo "  Login:   ${MON_USER}"
 echo ""
 echo "  Useful commands:"
