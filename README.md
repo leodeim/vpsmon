@@ -18,11 +18,15 @@ Monitors CPU, memory, swap, disk, network, uptime, and process count. Web UI wit
 curl -sL https://raw.githubusercontent.com/leodeim/vpsmon/main/install.sh | sudo bash
 ```
 
-### Uninstallation
+## Useful Commands
 
-```bash
-curl -sL https://raw.githubusercontent.com/leodeim/vpsmon/main/uninstall.sh | sudo bash
-```
+Once installed on your VPS, you can manage the monitor using these commands:
+
+- **Check status:** `sudo systemctl status vpsmon`
+- **View live logs:** `sudo journalctl -u vpsmon -f`
+- **Restart service:** `sudo systemctl restart vpsmon`
+- **Edit configuration:** `sudo nano /opt/vpsmon/.env` (Restart required after changing port or credentials)
+- **Uninstall:** `sudo bash /opt/vpsmon/uninstall.sh`
 
 ## Environment Variables
 

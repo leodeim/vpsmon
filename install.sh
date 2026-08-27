@@ -82,6 +82,10 @@ mv -f "${REMOTE_DIR}/${APP_NAME}.tmp" "${REMOTE_DIR}/${APP_NAME}"
 chmod 755 "${REMOTE_DIR}/${APP_NAME}"
 chown "${SERVICE_USER}:${SERVICE_GROUP}" "${REMOTE_DIR}/${APP_NAME}"
 
+echo "==> Downloading uninstall script..."
+curl -sL "https://raw.githubusercontent.com/${REPO}/main/uninstall.sh" -o "${REMOTE_DIR}/uninstall.sh" || true
+chmod 750 "${REMOTE_DIR}/uninstall.sh"
+
 echo "==> Generating credentials..."
 # Run the binary to generate password hash
 PASS_HASH=$("${REMOTE_DIR}/${APP_NAME}" -hash "${MON_PASS}")
@@ -144,4 +148,5 @@ echo "  Useful commands:"
 echo "    systemctl status ${APP_NAME}"
 echo "    journalctl -u ${APP_NAME} -f"
 echo "    systemctl restart ${APP_NAME}"
+echo "    sudo bash ${REMOTE_DIR}/uninstall.sh"
 echo "═══════════════════════════════════════"
