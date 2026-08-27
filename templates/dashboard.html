@@ -5,44 +5,66 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>vpsmon</title>
 <style>
-:root{--bg:#0f172a;--text:#e2e8f0;--card:#1e293b;--muted:#94a3b8;--border:#334155;--table-border:#1e293b;--primary:#38bdf8;--bar-bg:#334155;}
-[data-theme="light"]{--bg:#f8fafc;--text:#0f172a;--card:#ffffff;--muted:#64748b;--border:#cbd5e1;--table-border:#e2e8f0;--bar-bg:#e2e8f0;--primary:#0284c7;}
-*{margin:0;padding:0;box-sizing:border-box}
-body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;background:var(--bg);color:var(--text);padding:1.5rem;transition:background .3s,color .3s}
-.header{display:flex;justify-content:space-between;align-items:center;margin-bottom:1.5rem}
-h1{font-size:1.4rem;color:var(--primary)}
-.hostname{color:var(--muted);font-size:.9rem}
-.controls{display:flex;align-items:center}
-.theme-switch{background:none;border:none;color:var(--muted);cursor:pointer;font-size:1.2rem;margin-right:1rem;display:flex;align-items:center;transition:color .2s}
-.theme-switch:hover{color:var(--text)}
-.logout{color:var(--muted);text-decoration:none;font-size:.85rem;padding:.4rem .8rem;border:1px solid var(--border);border-radius:6px;transition:all .2s}
-.logout:hover{color:var(--text);border-color:var(--muted)}
-.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:1rem}
-.card{background:var(--card);border-radius:10px;padding:1.25rem;transition:background .3s;box-shadow:0 4px 6px -1px rgba(0,0,0,.05)}
-.card h2{font-size:.85rem;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;margin-bottom:1rem}
-.metric{display:flex;justify-content:space-between;align-items:center;margin-bottom:.75rem}
-.metric:last-child{margin-bottom:0}
-.label{color:var(--muted);font-size:.9rem}
-.value{font-size:.95rem;font-weight:600;font-variant-numeric:tabular-nums}
-.bar-wrap{width:100%;height:8px;background:var(--bar-bg);border-radius:4px;margin-top:.35rem;transition:background .3s}
-.bar{height:100%;border-radius:4px;transition:width .5s ease}
-.bar.green{background:#22c55e}
-.bar.yellow{background:#eab308}
-.bar.red{background:#ef4444}
-.sparkline{width:100%;height:50px;margin-top:1.25rem;display:block;overflow:visible}
-.wide{grid-column:1/-1}
-table{width:100%;border-collapse:collapse;font-size:.85rem}
-th{text-align:left;color:var(--muted);font-weight:500;padding:.5rem 0;border-bottom:1px solid var(--border)}
-td{padding:.5rem 0;border-bottom:1px solid var(--table-border)}
-.updated{text-align:center;color:var(--muted);font-size:.75rem;margin-top:1rem}
-.disconnected{background:#ef4444;color:white;text-align:center;padding:0.5rem;border-radius:6px;margin-bottom:1rem;display:none}
+:root {
+  color-scheme: light dark;
+  --bg: #f9f4f4;
+  --text: #111111;
+  --muted: #666666;
+  --border: #cccccc;
+  --bar-bg: #f1e6e6;
+  --bar-fill: #f4cccc;
+  --alert: #cc0000;
+  --link: #0000ff;
+}
+[data-theme="dark"] {
+  --bg: #1a1a1a;
+  --text: #e0e0e0;
+  --muted: #999999;
+  --border: #333333;
+  --bar-bg: #2a2a2a;
+  --bar-fill: #804040;
+  --alert: #ff4444;
+  --link: #52a8ff;
+  color-scheme: dark;
+}
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body {
+  font-family: 'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, Courier, monospace;
+  background: var(--bg);
+  color: var(--text);
+  padding: 1.5rem;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+a { color: var(--link); text-decoration: none; }
+a:hover { text-decoration: underline; }
+.header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 2rem; }
+.header-title { font-weight: bold; font-size: 1.2rem; display: flex; align-items: center; gap: 0.5rem; }
+.controls { display: flex; gap: 1rem; align-items: center; }
+.controls a { font-size: 0.85rem; }
+.theme-switch { background: none; border: none; color: var(--link); cursor: pointer; font-family: inherit; font-size: 0.85rem; padding: 0; }
+.theme-switch:hover { text-decoration: underline; }
+.grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 1.5rem; }
+.card { border: 1px solid var(--border); padding: 1.5rem 1rem 1rem; position: relative; background: transparent; display: flex; flex-direction: column; }
+.card-title { position: absolute; top: -0.75rem; left: 0.5rem; background: var(--bg); padding: 0 0.5rem; font-weight: bold; font-size: 0.95rem; }
+.metric-row { display: flex; justify-content: space-between; margin-bottom: 0.5rem; font-size: 0.9rem; }
+.bar-wrap { background: var(--bar-bg); height: 1.2rem; width: 100%; position: relative; margin-bottom: 0.8rem; }
+.bar { background: var(--bar-fill); height: 100%; width: 0%; transition: width 0.3s; }
+.bar-text { position: absolute; top: 0; left: 0.5rem; line-height: 1.2rem; font-size: 0.85rem; }
+table { width: 100%; border-collapse: collapse; font-size: 0.85rem; }
+th, td { padding: 0.3rem 0; text-align: left; }
+.td-right { text-align: right; }
+.disconnected { color: var(--alert); text-align: center; margin-bottom: 1rem; display: none; }
+.sparkline { width: 100%; height: 40px; margin-top: auto; padding-top: 1rem; }
+.updated { text-align: center; color: var(--muted); font-size: 0.8rem; margin-top: 2rem; }
+.section-title { font-size: 0.8rem; color: var(--muted); text-transform: uppercase; margin: 1rem 0 0.5rem; border-bottom: 1px dashed var(--border); }
 </style>
 <script>
 function setTheme(theme) {
   document.documentElement.setAttribute('data-theme', theme);
   localStorage.setItem('theme', theme);
   const btn = document.getElementById('theme-btn');
-  if(btn) btn.textContent = theme === 'light' ? '🌙' : '☀️';
+  if(btn) btn.textContent = theme === 'light' ? 'Dark Mode' : 'Light Mode';
 }
 function toggleTheme() {
   const cur = document.documentElement.getAttribute('data-theme');
@@ -53,56 +75,82 @@ setTheme(savedTheme);
 </script>
 </head>
 <body>
-<div id="offline-banner" class="disconnected">Disconnected / Reconnecting...</div>
+<div id="offline-banner" class="disconnected">Offline / Reconnecting...</div>
+
 <div class="header">
-<div><h1>vpsmon</h1><span class="hostname" id="hostname"></span></div>
-<div class="controls">
-<button class="theme-switch" id="theme-btn" onclick="toggleTheme()" title="Toggle Theme">☀️</button>
-<a href="/logout" class="logout">Logout</a>
+  <div>
+    <div class="header-title">vpsmon <span id="hostname" style="font-size: 0.85rem; font-weight: normal; color: var(--muted);">--</span></div>
+  </div>
+  <div class="controls">
+    <button class="theme-switch" id="theme-btn" onclick="toggleTheme()">Dark Mode</button>
+    <a href="/logout">Logout</a>
+  </div>
 </div>
-</div>
+
 <div class="grid">
-<div class="card">
-<h2>CPU</h2>
-<div class="metric"><span class="label">Usage</span><span class="value" id="cpu-usage">--</span></div>
-<div class="bar-wrap"><div class="bar" id="cpu-bar"></div></div>
-<div class="metric" style="margin-top:.75rem"><span class="label">Cores</span><span class="value" id="cpu-cores">--</span></div>
-<div class="metric"><span class="label">Load Average</span><span class="value" id="load-avg">--</span></div>
-<svg class="sparkline" id="cpu-chart"></svg>
-<div style="margin-top: 1rem;">
-  <h3 style="font-size: 0.75rem; color: var(--muted); margin-bottom: 0.5rem; text-transform: uppercase;">Top CPU</h3>
-  <table style="font-size: 0.8rem; width: 100%;"><tbody id="top-cpu"></tbody></table>
+  <!-- CPU Card -->
+  <div class="card">
+    <div class="card-title">CPU (<span id="cpu-cores">--</span> Cores)</div>
+    <div class="metric-row"><span>Load Average</span><span id="load-avg">--</span></div>
+    
+    <div class="bar-wrap" style="margin-top:1rem;">
+      <div class="bar" id="cpu-bar"></div>
+      <div class="bar-text">CPU <span id="cpu-usage">--</span></div>
+    </div>
+    
+    <svg class="sparkline" id="cpu-chart"></svg>
+    
+    <div class="section-title">Top CPU</div>
+    <table><tbody id="top-cpu"></tbody></table>
+  </div>
+
+  <!-- Memory Card -->
+  <div class="card">
+    <div class="card-title">Memory</div>
+    <div class="metric-row"><span>Used</span><span id="mem-used">--</span></div>
+    <div class="metric-row"><span>Total</span><span id="mem-total">--</span></div>
+    
+    <div class="bar-wrap" style="margin-top:1rem;">
+      <div class="bar" id="mem-bar"></div>
+      <div class="bar-text">RAM <span id="mem-usage-pct">--</span></div>
+    </div>
+    
+    <div class="bar-wrap" id="swap-wrap">
+      <div class="bar" id="swap-bar"></div>
+      <div class="bar-text">Swap <span id="swap-usage-pct">--</span></div>
+    </div>
+    
+    <svg class="sparkline" id="mem-chart"></svg>
+    
+    <div class="section-title">Top Memory</div>
+    <table><tbody id="top-mem"></tbody></table>
+  </div>
+
+  <!-- Network & System Card -->
+  <div class="card">
+    <div class="card-title">Network & System</div>
+    <div class="metric-row"><span>Uptime</span><span id="uptime">--</span></div>
+    <div class="metric-row"><span>Processes</span><span id="procs">--</span></div>
+    
+    <div class="section-title">Traffic</div>
+    <div class="metric-row"><span>Rx</span><span id="net-rx">--</span></div>
+    <div class="metric-row"><span>Tx</span><span id="net-tx">--</span></div>
+    
+    <svg class="sparkline" id="net-chart"></svg>
+  </div>
+
+  <!-- Disks Card -->
+  <div class="card" style="grid-column: 1 / -1;">
+    <div class="card-title">Disks</div>
+    <table>
+      <thead><tr><th>Mount</th><th class="td-right">Used</th><th class="td-right">Free</th><th class="td-right">Total</th></tr></thead>
+      <tbody id="disk-table"></tbody>
+    </table>
+  </div>
 </div>
-</div>
-<div class="card">
-<h2>Memory</h2>
-<div class="metric"><span class="label">Used / Total</span><span class="value" id="mem-usage">--</span></div>
-<div class="bar-wrap"><div class="bar" id="mem-bar"></div></div>
-<div class="metric" style="margin-top:.75rem"><span class="label">Swap</span><span class="value" id="swap-usage">--</span></div>
-<div class="bar-wrap"><div class="bar" id="swap-bar"></div></div>
-<svg class="sparkline" id="mem-chart"></svg>
-<div style="margin-top: 1rem;">
-  <h3 style="font-size: 0.75rem; color: var(--muted); margin-bottom: 0.5rem; text-transform: uppercase;">Top Memory</h3>
-  <table style="font-size: 0.8rem; width: 100%;"><tbody id="top-mem"></tbody></table>
-</div>
-</div>
-<div class="card">
-<h2>System</h2>
-<div class="metric"><span class="label">Uptime</span><span class="value" id="uptime">--</span></div>
-<div class="metric"><span class="label">Processes</span><span class="value" id="procs">--</span></div>
-<div class="metric"><span class="label" style="color:var(--primary)">Network RX</span><span class="value" id="net-rx">--</span></div>
-<div class="metric"><span class="label" style="color:#22c55e">Network TX</span><span class="value" id="net-tx">--</span></div>
-<svg class="sparkline" id="net-chart"></svg>
-</div>
-<div class="card wide">
-<h2>Disks</h2>
-<table>
-<thead><tr><th>Device</th><th>Mount</th><th>Used</th><th>Free</th><th>Total</th><th style="width:30%">Usage</th></tr></thead>
-<tbody id="disk-table"></tbody>
-</table>
-</div>
-</div>
+
 <div class="updated">Last updated: <span id="updated">--</span></div>
+
 <script>
 function fmt(bytes){
   if(bytes===0)return"0 B";
@@ -110,46 +158,33 @@ function fmt(bytes){
   const i=Math.floor(Math.log(bytes)/Math.log(k));
   return(bytes/Math.pow(k,i)).toFixed(1)+" "+s[i];
 }
-function barClass(pct){return pct>90?"red":pct>70?"yellow":"green"}
 function setBar(id,pct){
   const el=document.getElementById(id);
-  el.style.width=Math.min(pct,100)+"%";
-  el.className="bar "+barClass(pct);
+  if (el) el.style.width=Math.min(pct,100)+"%";
 }
 function drawSparkline(svgId, data, color) {
     const svg = document.getElementById(svgId);
-    if (!data || data.length < 2) return;
-    const w = 300, h = 50;
+    if (!svg || !data || data.length < 2) return;
+    const w = 300, h = 40;
     const max = Math.max(...data) || 1;
     const pts = data.map((val, i) => `${(i / (data.length - 1)) * w},${h - (val / max) * h}`).join(" ");
     svg.setAttribute("viewBox", `0 0 ${w} ${h}`);
     svg.setAttribute("preserveAspectRatio", "none");
-    svg.innerHTML = `<polyline fill="none" stroke="${color}" stroke-width="2" vector-effect="non-scaling-stroke" points="${pts}" />`;
+    svg.innerHTML = `<polyline fill="none" stroke="${color}" stroke-width="1.5" vector-effect="non-scaling-stroke" points="${pts}" />`;
 }
 function renderTop(id, procs, isMem) {
     const tbody = document.getElementById(id);
+    if (!tbody) return;
     if (!procs || procs.length === 0) {
         tbody.innerHTML = "<tr><td colspan='2' style='color:var(--muted); text-align:center;'>N/A</td></tr>";
         return;
     }
     tbody.innerHTML = procs.map(p => `
         <tr>
-            <td style="padding: 0.2rem 0; border: none; max-width: 150px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;" title="${p.name}">${p.name}</td>
-            <td style="padding: 0.2rem 0; border: none; text-align: right; font-weight: 600;">${(isMem ? p.mem : p.cpu).toFixed(1)}%</td>
+            <td style="max-width: 150px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;" title="${p.name}">${p.name}</td>
+            <td class="td-right">${(isMem ? p.mem : p.cpu).toFixed(1)}%</td>
         </tr>
     `).join("");
-}
-function drawDualSparkline(svgId, data1, data2, color1, color2) {
-    const svg = document.getElementById(svgId);
-    if (!data1 || data1.length < 2) return;
-    const w = 300, h = 50;
-    const max = Math.max(...data1, ...data2) || 1;
-    const pts1 = data1.map((val, i) => `${(i / (data1.length - 1)) * w},${h - (val / max) * h}`).join(" ");
-    const pts2 = data2.map((val, i) => `${(i / (data2.length - 1)) * w},${h - (val / max) * h}`).join(" ");
-    svg.setAttribute("viewBox", `0 0 ${w} ${h}`);
-    svg.setAttribute("preserveAspectRatio", "none");
-    svg.innerHTML = `<polyline fill="none" stroke="${color1}" stroke-width="2" vector-effect="non-scaling-stroke" points="${pts1}" />
-                     <polyline fill="none" stroke="${color2}" stroke-width="2" vector-effect="non-scaling-stroke" points="${pts2}" />`;
 }
 
 async function refresh(){
@@ -164,24 +199,29 @@ async function refresh(){
     const d = history[history.length-1];
     
     document.getElementById("hostname").textContent=d.hostname;
-    document.getElementById("cpu-usage").textContent=d.cpu_usage.toFixed(1)+"%";
+    document.getElementById("cpu-usage").textContent=d.cpu_usage.toFixed(2)+"%";
     setBar("cpu-bar",d.cpu_usage);
     document.getElementById("cpu-cores").textContent=d.cpu_count;
     document.getElementById("load-avg").textContent=d.load_avg;
-    document.getElementById("mem-usage").textContent=fmt(d.mem_used)+" / "+fmt(d.mem_total);
+    
+    document.getElementById("mem-used").textContent=fmt(d.mem_used);
+    document.getElementById("mem-total").textContent=fmt(d.mem_total);
+    document.getElementById("mem-usage-pct").textContent=d.mem_percent.toFixed(2)+"%";
     setBar("mem-bar",d.mem_percent);
     
+    const swapWrap = document.getElementById("swap-wrap");
     if(d.swap_total>0){
-      document.getElementById("swap-usage").textContent=fmt(d.swap_used)+" / "+fmt(d.swap_total)+" ("+d.swap_percent.toFixed(1)+"%)";
+      swapWrap.style.display = "block";
+      document.getElementById("swap-usage-pct").textContent=d.swap_percent.toFixed(2)+"%";
       setBar("swap-bar",d.swap_percent);
     }else{
-      document.getElementById("swap-usage").textContent="None";
+      swapWrap.style.display = "none";
     }
     
     document.getElementById("uptime").textContent=d.uptime;
     document.getElementById("procs").textContent=d.processes;
-    document.getElementById("net-rx").textContent=fmt(d.net_rx) + " (" + fmt(d.net_rx_speed) + "/s)";
-    document.getElementById("net-tx").textContent=fmt(d.net_tx) + " (" + fmt(d.net_tx_speed) + "/s)";
+    document.getElementById("net-rx").textContent=fmt(d.net_rx_speed) + "/s";
+    document.getElementById("net-tx").textContent=fmt(d.net_tx_speed) + "/s";
     
     renderTop("top-cpu", d.top_cpu, false);
     renderTop("top-mem", d.top_mem, true);
@@ -190,17 +230,23 @@ async function refresh(){
     tbody.innerHTML="";
     (d.disks||[]).forEach(dk=>{
       const tr=document.createElement("tr");
-      tr.innerHTML="<td>"+dk.device+"</td><td>"+dk.mount+"</td><td>"+fmt(dk.used)+"</td><td>"+fmt(dk.free)+"</td><td>"+fmt(dk.total)+'</td><td><div class="bar-wrap"><div class="bar '+barClass(dk.percent)+'" style="width:'+dk.percent.toFixed(0)+'%"></div></div> '+dk.percent.toFixed(1)+"%</td>";
+      tr.innerHTML="<td>"+dk.mount+"</td><td class='td-right'>"+fmt(dk.used)+"</td><td class='td-right'>"+fmt(dk.free)+"</td><td class='td-right'>"+fmt(dk.total)+"</td>";
       tbody.appendChild(tr);
+      
+      const trBar=document.createElement("tr");
+      trBar.innerHTML="<td colspan='4' style='padding-top:0;'><div class='bar-wrap' style='height:1rem; margin-bottom:0.5rem;'><div class='bar' style='width:"+dk.percent.toFixed(0)+"%'></div><div class='bar-text'>Disk "+dk.percent.toFixed(2)+"%</div></div></td>";
+      tbody.appendChild(trBar);
     });
     
     document.getElementById("updated").textContent=new Date(d.timestamp).toLocaleTimeString();
     
     const style = getComputedStyle(document.documentElement);
-    const pColor = style.getPropertyValue('--primary').trim();
-    drawSparkline("cpu-chart", history.map(m => m.cpu_usage), pColor);
-    drawSparkline("mem-chart", history.map(m => m.mem_percent), "#8b5cf6");
-    drawDualSparkline("net-chart", history.map(m => m.net_rx_speed), history.map(m => m.net_tx_speed), pColor, "#22c55e");
+    const alertColor = style.getPropertyValue('--alert').trim() || 'red';
+    const textColor = style.getPropertyValue('--text').trim() || 'black';
+    
+    drawSparkline("cpu-chart", history.map(m => m.cpu_usage), textColor);
+    drawSparkline("mem-chart", history.map(m => m.mem_percent), textColor);
+    drawSparkline("net-chart", history.map(m => m.net_rx_speed), alertColor);
     
   }catch(e){
     console.error(e);
@@ -209,6 +255,10 @@ async function refresh(){
 }
 refresh();
 setInterval(refresh,5000);
+
+const curTheme = document.documentElement.getAttribute('data-theme');
+const themeBtn = document.getElementById('theme-btn');
+if(themeBtn) themeBtn.textContent = curTheme === 'light' ? 'Dark Mode' : 'Light Mode';
 </script>
 </body>
 </html>

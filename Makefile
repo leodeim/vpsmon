@@ -17,7 +17,3 @@ dev:
 		go install github.com/air-verse/air@latest; \
 	fi
 	@air
-
-clean:
-	@echo "==> Cleaning..."
-	@rm -f ${APP_NAME}

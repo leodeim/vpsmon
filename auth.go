@@ -106,3 +106,30 @@ func authenticated(r *http.Request) bool {
 	}
 	return sessions.valid(c.Value)
 }
+
+func init() {
+	go func() {
+		for {
+			time.Sleep(1 * time.Hour)
+			now := time.Now()
+
+			// Cleanup expired sessions
+			sessions.mu.Lock()
+			for token, exp := range sessions.sessions {
+				if now.After(exp) {
+					delete(sessions.sessions, token)
+				}
+			}
+			sessions.mu.Unlock()
+
+			// Cleanup old rate limit entries
+			loginMu.Lock()
+			for ip, attempt := range loginAttempts {
+				if now.Sub(attempt.last) > 5*time.Minute {
+					delete(loginAttempts, ip)
+				}
+			}
+			loginMu.Unlock()
+		}
+	}()
+}

@@ -27,27 +27,27 @@ type TopProcess struct {
 }
 
 type Metrics struct {
-	Hostname    string     `json:"hostname"`
-	Uptime      string     `json:"uptime"`
-	LoadAvg     string     `json:"load_avg"`
-	CPUCount    int        `json:"cpu_count"`
-	CPUUsage    float64    `json:"cpu_usage"`
-	MemTotal    uint64     `json:"mem_total"`
-	MemUsed     uint64     `json:"mem_used"`
-	MemFree     uint64     `json:"mem_free"`
-	MemPercent  float64    `json:"mem_percent"`
-	SwapTotal   uint64     `json:"swap_total"`
-	SwapUsed    uint64     `json:"swap_used"`
-	SwapPercent float64    `json:"swap_percent"`
-	Disks       []DiskInfo `json:"disks"`
-	NetRx       uint64     `json:"net_rx"`
-	NetTx       uint64     `json:"net_tx"`
-	NetRxSpeed  float64    `json:"net_rx_speed"`
-	NetTxSpeed  float64    `json:"net_tx_speed"`
-	Processes   int        `json:"processes"`
+	Hostname    string       `json:"hostname"`
+	Uptime      string       `json:"uptime"`
+	LoadAvg     string       `json:"load_avg"`
+	CPUCount    int          `json:"cpu_count"`
+	CPUUsage    float64      `json:"cpu_usage"`
+	MemTotal    uint64       `json:"mem_total"`
+	MemUsed     uint64       `json:"mem_used"`
+	MemFree     uint64       `json:"mem_free"`
+	MemPercent  float64      `json:"mem_percent"`
+	SwapTotal   uint64       `json:"swap_total"`
+	SwapUsed    uint64       `json:"swap_used"`
+	SwapPercent float64      `json:"swap_percent"`
+	Disks       []DiskInfo   `json:"disks"`
+	NetRx       uint64       `json:"net_rx"`
+	NetTx       uint64       `json:"net_tx"`
+	NetRxSpeed  float64      `json:"net_rx_speed"`
+	NetTxSpeed  float64      `json:"net_tx_speed"`
+	Processes   int          `json:"processes"`
 	TopCPU      []TopProcess `json:"top_cpu"`
 	TopMem      []TopProcess `json:"top_mem"`
-	Timestamp   time.Time  `json:"timestamp"`
+	Timestamp   time.Time    `json:"timestamp"`
 }
 
 type DiskInfo struct {
@@ -140,13 +140,13 @@ func getTopProcesses(sortByMem bool) []TopProcess {
 	if sortByMem {
 		sortArg = "-%mem"
 	}
-	
+
 	cmd := exec.Command("ps", "-eo", "pcpu,pmem,comm", "--sort="+sortArg, "--no-headers")
 	out, err := cmd.Output()
 	if err != nil {
 		return procs
 	}
-	
+
 	lines := strings.Split(string(out), "\n")
 	for _, line := range lines {
 		line = strings.TrimSpace(line)
@@ -160,15 +160,15 @@ func getTopProcesses(sortByMem bool) []TopProcess {
 		cpu, _ := strconv.ParseFloat(fields[0], 64)
 		mem, _ := strconv.ParseFloat(fields[1], 64)
 		name := strings.Join(fields[2:], " ")
-		
+
 		name = filepath.Base(name)
-		
+
 		procs = append(procs, TopProcess{
 			Name: name,
 			CPU:  cpu,
 			Mem:  mem,
 		})
-		
+
 		if len(procs) >= 5 {
 			break
 		}
