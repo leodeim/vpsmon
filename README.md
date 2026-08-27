@@ -24,6 +24,7 @@ Once installed on your VPS, you can manage the monitor using these commands:
 
 - **Check status:** `sudo systemctl status vpsmon`
 - **View live logs:** `sudo journalctl -u vpsmon -f`
+- **Update to latest:** `sudo bash /opt/vpsmon/update.sh`
 - **Restart service:** `sudo systemctl restart vpsmon`
 - **Edit configuration:** `sudo nano /opt/vpsmon/.env` (Restart required after changing port or credentials)
 - **Uninstall:** `sudo bash /opt/vpsmon/uninstall.sh`
