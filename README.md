@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="misc/logo.png" width="200" alt="vpsmon Logo">
+  <img src="misc/logo.png" width="400" alt="vpsmon Logo">
 </p>
 
 # vpsmon
