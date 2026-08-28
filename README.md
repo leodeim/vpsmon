@@ -4,6 +4,11 @@
 
 # vpsmon
 
+[![Build and Release](https://github.com/leodeim/vpsmon/actions/workflows/build.yml/badge.svg)](https://github.com/leodeim/vpsmon/actions/workflows/build.yml)
+[![Latest Release](https://img.shields.io/github/v/release/leodeim/vpsmon)](https://github.com/leodeim/vpsmon/releases/latest)
+[![Downloads](https://img.shields.io/github/downloads/leodeim/vpsmon/total)](https://github.com/leodeim/vpsmon/releases)
+[![License](https://img.shields.io/github/license/leodeim/vpsmon)](https://github.com/leodeim/vpsmon/blob/main/LICENSE)
+
 Lightweight system monitor for Linux VPS. Single Go binary, ~5MB RAM usage.
 
 <p align="center">
