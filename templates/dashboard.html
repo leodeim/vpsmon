@@ -147,6 +147,15 @@ setTheme(savedTheme);
       <tbody id="disk-table"></tbody>
     </table>
   </div>
+
+  <!-- Docker Card -->
+  <div class="card" id="docker-card" style="grid-column: 1 / -1; display: none;">
+    <div class="card-title">Docker Containers</div>
+    <table>
+      <thead><tr><th>Name</th><th class="td-right">CPU</th><th class="td-right">RAM</th></tr></thead>
+      <tbody id="docker-table"></tbody>
+    </table>
+  </div>
 </div>
 
 <div class="updated">Last updated: <span id="updated">--</span></div>
@@ -238,6 +247,21 @@ async function refresh(){
       tbody.appendChild(trBar);
     });
     
+    const dockerCard = document.getElementById("docker-card");
+    const dockerTbody = document.getElementById("docker-table");
+    if(d.containers && d.containers.length > 0) {
+      dockerCard.style.display = "flex";
+      dockerTbody.innerHTML = d.containers.map(c => `
+        <tr>
+          <td>${c.name}</td>
+          <td class="td-right">${c.cpu.toFixed(2)}%</td>
+          <td class="td-right">${c.mem.toFixed(2)}%</td>
+        </tr>
+      `).join("");
+    } else {
+      dockerCard.style.display = "none";
+    }
+
     document.getElementById("updated").textContent=new Date(d.timestamp).toLocaleTimeString();
     
     const style = getComputedStyle(document.documentElement);

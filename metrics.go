@@ -26,28 +26,35 @@ type TopProcess struct {
 	Mem  float64 `json:"mem"`
 }
 
+type DockerContainer struct {
+	Name string  `json:"name"`
+	CPU  float64 `json:"cpu"`
+	Mem  float64 `json:"mem"`
+}
+
 type Metrics struct {
-	Hostname    string       `json:"hostname"`
-	Uptime      string       `json:"uptime"`
-	LoadAvg     string       `json:"load_avg"`
-	CPUCount    int          `json:"cpu_count"`
-	CPUUsage    float64      `json:"cpu_usage"`
-	MemTotal    uint64       `json:"mem_total"`
-	MemUsed     uint64       `json:"mem_used"`
-	MemFree     uint64       `json:"mem_free"`
-	MemPercent  float64      `json:"mem_percent"`
-	SwapTotal   uint64       `json:"swap_total"`
-	SwapUsed    uint64       `json:"swap_used"`
-	SwapPercent float64      `json:"swap_percent"`
-	Disks       []DiskInfo   `json:"disks"`
-	NetRx       uint64       `json:"net_rx"`
-	NetTx       uint64       `json:"net_tx"`
-	NetRxSpeed  float64      `json:"net_rx_speed"`
-	NetTxSpeed  float64      `json:"net_tx_speed"`
-	Processes   int          `json:"processes"`
-	TopCPU      []TopProcess `json:"top_cpu"`
-	TopMem      []TopProcess `json:"top_mem"`
-	Timestamp   time.Time    `json:"timestamp"`
+	Hostname    string            `json:"hostname"`
+	Uptime      string            `json:"uptime"`
+	LoadAvg     string            `json:"load_avg"`
+	CPUCount    int               `json:"cpu_count"`
+	CPUUsage    float64           `json:"cpu_usage"`
+	MemTotal    uint64            `json:"mem_total"`
+	MemUsed     uint64            `json:"mem_used"`
+	MemFree     uint64            `json:"mem_free"`
+	MemPercent  float64           `json:"mem_percent"`
+	SwapTotal   uint64            `json:"swap_total"`
+	SwapUsed    uint64            `json:"swap_used"`
+	SwapPercent float64           `json:"swap_percent"`
+	Disks       []DiskInfo        `json:"disks"`
+	NetRx       uint64            `json:"net_rx"`
+	NetTx       uint64            `json:"net_tx"`
+	NetRxSpeed  float64           `json:"net_rx_speed"`
+	NetTxSpeed  float64           `json:"net_tx_speed"`
+	Processes   int               `json:"processes"`
+	TopCPU      []TopProcess      `json:"top_cpu"`
+	TopMem      []TopProcess      `json:"top_mem"`
+	Containers  []DockerContainer `json:"containers"`
+	Timestamp   time.Time         `json:"timestamp"`
 }
 
 type DiskInfo struct {
@@ -130,8 +137,46 @@ func collectMetrics() Metrics {
 
 	m.TopCPU = getTopProcesses(false)
 	m.TopMem = getTopProcesses(true)
+	m.Containers = getDockerContainers()
 
 	return m
+}
+
+func getDockerContainers() []DockerContainer {
+	var containers []DockerContainer
+
+	cmd := exec.Command("docker", "stats", "--no-stream", "--format", "{{.Name}}|{{.CPUPerc}}|{{.MemPerc}}")
+	out, err := cmd.Output()
+	if err != nil {
+		return containers
+	}
+
+	lines := strings.Split(string(out), "\n")
+	for _, line := range lines {
+		line = strings.TrimSpace(line)
+		if line == "" {
+			continue
+		}
+		parts := strings.Split(line, "|")
+		if len(parts) != 3 {
+			continue
+		}
+		
+		name := parts[0]
+		
+		cpuStr := strings.TrimSuffix(parts[1], "%")
+		cpu, _ := strconv.ParseFloat(cpuStr, 64)
+		
+		memStr := strings.TrimSuffix(parts[2], "%")
+		mem, _ := strconv.ParseFloat(memStr, 64)
+
+		containers = append(containers, DockerContainer{
+			Name: name,
+			CPU:  cpu,
+			Mem:  mem,
+		})
+	}
+	return containers
 }
 
 func getTopProcesses(sortByMem bool) []TopProcess {
