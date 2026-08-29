@@ -13,6 +13,7 @@ import (
 	"golang.org/x/crypto/bcrypt"
 	
 	"vpsmon/internal/metrics"
+	"vpsmon/misc"
 )
 
 //go:embed templates/*
@@ -36,6 +37,17 @@ func StartServer(listenAddr, username, expectedPassHash string) {
 		}
 		w.Header().Set("Content-Type", "text/html; charset=utf-8")
 		w.Write(dashboardHTML)
+	})
+
+	mux.HandleFunc("/favicon.ico", func(w http.ResponseWriter, r *http.Request) {
+		icon, err := misc.FS.ReadFile("icon.ico")
+		if err != nil {
+			http.NotFound(w, r)
+			return
+		}
+		w.Header().Set("Content-Type", "image/x-icon")
+		w.Header().Set("Cache-Control", "public, max-age=2592000") // Cache for 30 days
+		w.Write(icon)
 	})
 
 	mux.HandleFunc("/login", func(w http.ResponseWriter, r *http.Request) {
