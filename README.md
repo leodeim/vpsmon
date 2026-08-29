@@ -2,20 +2,25 @@
   <img src="misc/logo.png" width="400" alt="vpsmon Logo">
 </p>
 
-# vpsmon
+<p align="center">
+  <a href="https://github.com/leodeim/vpsmon/actions/workflows/build.yml"><img src="https://github.com/leodeim/vpsmon/actions/workflows/build.yml/badge.svg" alt="Build and Release"></a>
+  <a href="https://github.com/leodeim/vpsmon/releases/latest"><img src="https://img.shields.io/github/v/release/leodeim/vpsmon" alt="Latest Release"></a>
+  <a href="https://github.com/leodeim/vpsmon/releases"><img src="https://img.shields.io/github/downloads/leodeim/vpsmon/total" alt="Downloads"></a>
+  <a href="https://github.com/leodeim/vpsmon/blob/main/LICENSE"><img src="https://img.shields.io/github/license/leodeim/vpsmon" alt="License"></a>
+</p>
 
-[![Build and Release](https://github.com/leodeim/vpsmon/actions/workflows/build.yml/badge.svg)](https://github.com/leodeim/vpsmon/actions/workflows/build.yml)
-[![Latest Release](https://img.shields.io/github/v/release/leodeim/vpsmon)](https://github.com/leodeim/vpsmon/releases/latest)
-[![Downloads](https://img.shields.io/github/downloads/leodeim/vpsmon/total)](https://github.com/leodeim/vpsmon/releases)
-[![License](https://img.shields.io/github/license/leodeim/vpsmon)](https://github.com/leodeim/vpsmon/blob/main/LICENSE)
+## Features
 
-Lightweight system monitor for Linux VPS. Single Go binary, ~5MB RAM usage.
+- **Live System Metrics:** CPU, Memory, Swap, and Load Average
+- **Docker Integration:** Automatically detects and displays live CPU/RAM usage for running containers
+- **Process Monitoring:** Shows the top 5 processes by CPU and Memory usage
+- **Disk & Network:** Tracks used/free space across all mounts and live network Rx/Tx speeds
+- **Built-in Security:** Password-protected Web UI (bcrypt) with login rate-limiting
+- **Ultra Lightweight:** Single Go binary with zero dependencies and ~5MB RAM footprint
 
 <p align="center">
   <img src="misc/screenshot.png" width="800" alt="vpsmon Screenshot">
 </p>
-
-Monitors CPU, memory, swap, disk, network, uptime, and process count. Web UI with login, auto-refreshes every 5 seconds.
 
 ## Installation
 
