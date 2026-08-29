@@ -1,4 +1,4 @@
-package main
+package metrics
 
 import (
 	"bufio"
@@ -358,7 +358,7 @@ func parseKB(s string) uint64 {
 	return v * 1024
 }
 
-func StartMetricsCollector() {
+func StartCollector() {
 	collectAndStore()
 	go func() {
 		for {
@@ -393,7 +393,7 @@ func collectAndStore() {
 	}
 }
 
-func getMetricsHistory() []Metrics {
+func GetHistory() []Metrics {
 	metricsMu.RLock()
 	defer metricsMu.RUnlock()
 	res := make([]Metrics, len(metricsHistory))

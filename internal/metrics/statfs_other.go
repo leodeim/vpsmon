@@ -1,6 +1,6 @@
 //go:build !linux
 
-package main
+package metrics
 
 type syscallStatfs struct {
 	Bsize  int64

@@ -37,7 +37,7 @@ jobs:
           GOOS: ${{ matrix.goos }}
           GOARCH: ${{ matrix.goarch }}
         run: |
-          CGO_ENABLED=0 go build -ldflags="-s -w" -o vpsmon-${{ matrix.goos }}-${{ matrix.goarch }} .
+          CGO_ENABLED=0 go build -ldflags="-s -w" -o vpsmon-${{ matrix.goos }}-${{ matrix.goarch }} ./cmd/vpsmon
 
       - name: Upload Artifact
         uses: actions/upload-artifact@v4

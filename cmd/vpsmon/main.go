@@ -7,6 +7,9 @@ import (
 	"os"
 
 	"golang.org/x/crypto/bcrypt"
+	
+	"vpsmon/internal/api"
+	"vpsmon/internal/metrics"
 )
 
 func envOr(key, fallback string) string {
@@ -35,6 +38,6 @@ func main() {
 	defaultHash, _ := bcrypt.GenerateFromPassword([]byte("changeme"), bcrypt.DefaultCost)
 	expectedPassHash := envOr("MONITOR_PASS_HASH", string(defaultHash))
 
-	StartMetricsCollector()
-	startServer(listenAddr, username, expectedPassHash)
+	metrics.StartCollector()
+	api.StartServer(listenAddr, username, expectedPassHash)
 }

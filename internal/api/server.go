@@ -1,4 +1,4 @@
-package main
+package api
 
 import (
 	"crypto/subtle"
@@ -11,12 +11,14 @@ import (
 	"time"
 
 	"golang.org/x/crypto/bcrypt"
+	
+	"vpsmon/internal/metrics"
 )
 
 //go:embed templates/*
 var templateFiles embed.FS
 
-func startServer(listenAddr, username, expectedPassHash string) {
+func StartServer(listenAddr, username, expectedPassHash string) {
 	loginHTML, _ := templateFiles.ReadFile("templates/login.html")
 	loginErrorHTML, _ := templateFiles.ReadFile("templates/login_error.html")
 	dashboardHTML, _ := templateFiles.ReadFile("templates/dashboard.html")
@@ -108,7 +110,7 @@ func startServer(listenAddr, username, expectedPassHash string) {
 		w.Header().Set("Connection", "keep-alive")
 
 		sendMetrics := func() {
-			data, _ := json.Marshal(getMetricsHistory())
+			data, _ := json.Marshal(metrics.GetHistory())
 			fmt.Fprintf(w, "data: %s\n\n", string(data))
 			flusher.Flush()
 		}

@@ -4,7 +4,7 @@ APP_NAME = vpsmon
 
 build:
 	@echo "==> Building ${APP_NAME}..."
-	@go build -ldflags="-s -w" -o ${APP_NAME} .
+	@go build -ldflags="-s -w" -o ${APP_NAME} ./cmd/vpsmon
 
 run: build
 	@echo "==> Running ${APP_NAME} locally on :8088..."
