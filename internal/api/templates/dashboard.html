@@ -8,24 +8,28 @@
 <style>
 :root {
   color-scheme: light dark;
-  --bg: #f9f4f4;
-  --text: #111111;
-  --muted: #666666;
+  --bg: #f7f7f7;
+  --text: #101828;
+  --muted: #526176;
   --border: #cccccc;
-  --bar-bg: #f1e6e6;
-  --bar-fill: #f4cccc;
+  --bar-bg: #e5eeee;
+  --accent-start: #5aada8;
+  --accent-end: #6d8fc2;
+  --bar-fill: linear-gradient(90deg, var(--accent-start), var(--accent-end));
   --alert: #cc0000;
-  --link: #0000ff;
+  --link: #5d80b5;
 }
 [data-theme="dark"] {
   --bg: #1a1a1a;
-  --text: #e0e0e0;
-  --muted: #999999;
+  --text: #e7f3ff;
+  --muted: #94a9bd;
   --border: #333333;
-  --bar-bg: #2a2a2a;
-  --bar-fill: #804040;
+  --bar-bg: #202d36;
+  --accent-start: #63b7b1;
+  --accent-end: #7599d1;
+  --bar-fill: linear-gradient(90deg, var(--accent-start), var(--accent-end));
   --alert: #ff4444;
-  --link: #52a8ff;
+  --link: #7599d1;
   color-scheme: dark;
 }
 * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -267,12 +271,12 @@ function connectSSE() {
       document.getElementById("updated").textContent=new Date(d.timestamp).toLocaleTimeString();
       
       const style = getComputedStyle(document.documentElement);
-      const alertColor = style.getPropertyValue('--alert').trim() || 'red';
+      const chartColor = style.getPropertyValue('--accent-end').trim() || 'blue';
       const textColor = style.getPropertyValue('--text').trim() || 'black';
       
       drawSparkline("cpu-chart", history.map(m => m.cpu_usage), textColor);
       drawSparkline("mem-chart", history.map(m => m.mem_percent), textColor);
-      drawSparkline("net-chart", history.map(m => m.net_rx_speed), alertColor);
+      drawSparkline("net-chart", history.map(m => m.net_rx_speed), chartColor);
       
     } catch(e) {
       console.error(e);
