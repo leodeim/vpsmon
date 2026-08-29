@@ -196,89 +196,101 @@ function renderTop(id, procs, isMem) {
     `).join("");
 }
 
-async function refresh(){
-  try{
-    const r=await fetch("/api/metrics");
-    if(r.status===401){window.location="/login";return}
+let evtSource;
+function connectSSE() {
+  evtSource = new EventSource("/api/metrics/stream");
+  
+  evtSource.onmessage = function(event) {
     document.getElementById("offline-banner").style.display = "none";
-    
-    const history=await r.json();
-    if(history.length === 0) return;
-    
-    const d = history[history.length-1];
-    
-    document.getElementById("hostname").textContent=d.hostname;
-    document.getElementById("cpu-usage").textContent=d.cpu_usage.toFixed(2)+"%";
-    setBar("cpu-bar",d.cpu_usage);
-    document.getElementById("cpu-cores").textContent=d.cpu_count;
-    document.getElementById("load-avg").textContent=d.load_avg;
-    
-    document.getElementById("mem-used").textContent=fmt(d.mem_used);
-    document.getElementById("mem-total").textContent=fmt(d.mem_total);
-    document.getElementById("mem-usage-pct").textContent=d.mem_percent.toFixed(2)+"%";
-    setBar("mem-bar",d.mem_percent);
-    
-    const swapWrap = document.getElementById("swap-wrap");
-    if(d.swap_total>0){
-      swapWrap.style.display = "block";
-      document.getElementById("swap-usage-pct").textContent=d.swap_percent.toFixed(2)+"%";
-      setBar("swap-bar",d.swap_percent);
-    }else{
-      swapWrap.style.display = "none";
-    }
-    
-    document.getElementById("uptime").textContent=d.uptime;
-    document.getElementById("procs").textContent=d.processes;
-    document.getElementById("net-rx").textContent=fmt(d.net_rx_speed) + "/s";
-    document.getElementById("net-tx").textContent=fmt(d.net_tx_speed) + "/s";
-    
-    renderTop("top-cpu", d.top_cpu, false);
-    renderTop("top-mem", d.top_mem, true);
-    
-    const tbody=document.getElementById("disk-table");
-    tbody.innerHTML="";
-    (d.disks||[]).forEach(dk=>{
-      const tr=document.createElement("tr");
-      tr.innerHTML="<td>"+dk.mount+"</td><td class='td-right'>"+fmt(dk.used)+"</td><td class='td-right'>"+fmt(dk.free)+"</td><td class='td-right'>"+fmt(dk.total)+"</td>";
-      tbody.appendChild(tr);
+    try {
+      const history = JSON.parse(event.data);
+      if(history.length === 0) return;
       
-      const trBar=document.createElement("tr");
-      trBar.innerHTML="<td colspan='4' style='padding-top:0;'><div class='bar-wrap' style='height:1rem; margin-bottom:0.5rem;'><div class='bar' style='width:"+dk.percent.toFixed(0)+"%'></div><div class='bar-text'>Disk "+dk.percent.toFixed(2)+"%</div></div></td>";
-      tbody.appendChild(trBar);
-    });
-    
-    const dockerCard = document.getElementById("docker-card");
-    const dockerTbody = document.getElementById("docker-table");
-    if(d.containers && d.containers.length > 0) {
-      dockerCard.style.display = "flex";
-      dockerTbody.innerHTML = d.containers.map(c => `
-        <tr>
-          <td>${c.name}</td>
-          <td class="td-right">${c.cpu.toFixed(2)}%</td>
-          <td class="td-right">${c.mem.toFixed(2)}%</td>
-        </tr>
-      `).join("");
-    } else {
-      dockerCard.style.display = "none";
-    }
+      const d = history[history.length-1];
+      
+      document.getElementById("hostname").textContent=d.hostname;
+      document.getElementById("cpu-usage").textContent=d.cpu_usage.toFixed(2)+"%";
+      setBar("cpu-bar",d.cpu_usage);
+      document.getElementById("cpu-cores").textContent=d.cpu_count;
+      document.getElementById("load-avg").textContent=d.load_avg;
+      
+      document.getElementById("mem-used").textContent=fmt(d.mem_used);
+      document.getElementById("mem-total").textContent=fmt(d.mem_total);
+      document.getElementById("mem-usage-pct").textContent=d.mem_percent.toFixed(2)+"%";
+      setBar("mem-bar",d.mem_percent);
+      
+      const swapWrap = document.getElementById("swap-wrap");
+      if(d.swap_total>0){
+        swapWrap.style.display = "block";
+        document.getElementById("swap-usage-pct").textContent=d.swap_percent.toFixed(2)+"%";
+        setBar("swap-bar",d.swap_percent);
+      }else{
+        swapWrap.style.display = "none";
+      }
+      
+      document.getElementById("uptime").textContent=d.uptime;
+      document.getElementById("procs").textContent=d.processes;
+      document.getElementById("net-rx").textContent=fmt(d.net_rx_speed) + "/s";
+      document.getElementById("net-tx").textContent=fmt(d.net_tx_speed) + "/s";
+      
+      renderTop("top-cpu", d.top_cpu, false);
+      renderTop("top-mem", d.top_mem, true);
+      
+      const tbody=document.getElementById("disk-table");
+      tbody.innerHTML="";
+      (d.disks||[]).forEach(dk=>{
+        const tr=document.createElement("tr");
+        tr.innerHTML="<td>"+dk.mount+"</td><td class='td-right'>"+fmt(dk.used)+"</td><td class='td-right'>"+fmt(dk.free)+"</td><td class='td-right'>"+fmt(dk.total)+"</td>";
+        tbody.appendChild(tr);
+        
+        const trBar=document.createElement("tr");
+        trBar.innerHTML="<td colspan='4' style='padding-top:0;'><div class='bar-wrap' style='height:1rem; margin-bottom:0.5rem;'><div class='bar' style='width:"+dk.percent.toFixed(0)+"%'></div><div class='bar-text'>Disk "+dk.percent.toFixed(2)+"%</div></div></td>";
+        tbody.appendChild(trBar);
+      });
+      
+      const dockerCard = document.getElementById("docker-card");
+      const dockerTbody = document.getElementById("docker-table");
+      if(d.containers && d.containers.length > 0) {
+        dockerCard.style.display = "flex";
+        dockerTbody.innerHTML = d.containers.map(c => `
+          <tr>
+            <td>${c.name}</td>
+            <td class="td-right">${c.cpu.toFixed(2)}%</td>
+            <td class="td-right">${c.mem.toFixed(2)}%</td>
+          </tr>
+        `).join("");
+      } else {
+        dockerCard.style.display = "none";
+      }
 
-    document.getElementById("updated").textContent=new Date(d.timestamp).toLocaleTimeString();
-    
-    const style = getComputedStyle(document.documentElement);
-    const alertColor = style.getPropertyValue('--alert').trim() || 'red';
-    const textColor = style.getPropertyValue('--text').trim() || 'black';
-    
-    drawSparkline("cpu-chart", history.map(m => m.cpu_usage), textColor);
-    drawSparkline("mem-chart", history.map(m => m.mem_percent), textColor);
-    drawSparkline("net-chart", history.map(m => m.net_rx_speed), alertColor);
-    
-  }catch(e){
-    console.error(e);
+      document.getElementById("updated").textContent=new Date(d.timestamp).toLocaleTimeString();
+      
+      const style = getComputedStyle(document.documentElement);
+      const alertColor = style.getPropertyValue('--alert').trim() || 'red';
+      const textColor = style.getPropertyValue('--text').trim() || 'black';
+      
+      drawSparkline("cpu-chart", history.map(m => m.cpu_usage), textColor);
+      drawSparkline("mem-chart", history.map(m => m.mem_percent), textColor);
+      drawSparkline("net-chart", history.map(m => m.net_rx_speed), alertColor);
+      
+    } catch(e) {
+      console.error(e);
+    }
+  };
+
+  evtSource.onerror = async function(err) {
+    console.error("SSE error", err);
     document.getElementById("offline-banner").style.display = "block";
-  }
+    
+    try {
+      const r = await fetch("/");
+      if (r.url.includes("/login")) {
+        window.location = "/login";
+      }
+    } catch(e) {}
+  };
 }
-refresh();
-setInterval(refresh,5000);
+connectSSE();
 
 const curTheme = document.documentElement.getAttribute('data-theme');
 const themeBtn = document.getElementById('theme-btn');

@@ -8,6 +8,7 @@ import (
 	"log"
 	"net/http"
 	"strings"
+	"time"
 
 	"golang.org/x/crypto/bcrypt"
 )
@@ -90,13 +91,44 @@ func startServer(listenAddr, username, expectedPassHash string) {
 		http.Redirect(w, r, "/login", http.StatusFound)
 	})
 
-	mux.HandleFunc("/api/metrics", func(w http.ResponseWriter, r *http.Request) {
+	mux.HandleFunc("/api/metrics/stream", func(w http.ResponseWriter, r *http.Request) {
 		if !authenticated(r) {
 			http.Error(w, "unauthorized", http.StatusUnauthorized)
 			return
 		}
-		w.Header().Set("Content-Type", "application/json")
-		json.NewEncoder(w).Encode(getMetricsHistory())
+		
+		flusher, ok := w.(http.Flusher)
+		if !ok {
+			http.Error(w, "Streaming unsupported", http.StatusInternalServerError)
+			return
+		}
+
+		w.Header().Set("Content-Type", "text/event-stream")
+		w.Header().Set("Cache-Control", "no-cache")
+		w.Header().Set("Connection", "keep-alive")
+
+		sendMetrics := func() {
+			data, _ := json.Marshal(getMetricsHistory())
+			fmt.Fprintf(w, "data: %s\n\n", string(data))
+			flusher.Flush()
+		}
+		
+		sendMetrics() // Send initial data immediately
+
+		ticker := time.NewTicker(5 * time.Second)
+		defer ticker.Stop()
+
+		for {
+			select {
+			case <-r.Context().Done():
+				return // Client disconnected
+			case <-ticker.C:
+				if !authenticated(r) {
+					return // Session expired, drop connection
+				}
+				sendMetrics()
+			}
+		}
 	})
 
 	log.Printf("vpsmon starting on %s", listenAddr)
