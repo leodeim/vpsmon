@@ -4,7 +4,7 @@ set -euo pipefail
 # ─────────────────────────────────────────────
 # VPSmon - Quick Install Script (Run on VPS)
 # Usage:
-# curl -sL https://raw.githubusercontent.com/leodeim/vpsmon/main/install.sh | sudo bash
+# curl -sL https://raw.githubusercontent.com/leodeim/vpsmon/main/scripts/install.sh | sudo bash
 # ─────────────────────────────────────────────
 
 REPO="leodeim/vpsmon"
@@ -83,8 +83,8 @@ chmod 755 "${REMOTE_DIR}/${APP_NAME}"
 chown "${SERVICE_USER}:${SERVICE_GROUP}" "${REMOTE_DIR}/${APP_NAME}"
 
 echo "==> Downloading update/uninstall scripts..."
-curl -sL "https://raw.githubusercontent.com/${REPO}/main/update.sh" -o "${REMOTE_DIR}/update.sh" || true
-curl -sL "https://raw.githubusercontent.com/${REPO}/main/uninstall.sh" -o "${REMOTE_DIR}/uninstall.sh" || true
+curl -sL "https://raw.githubusercontent.com/${REPO}/main/scripts/update.sh" -o "${REMOTE_DIR}/update.sh" || true
+curl -sL "https://raw.githubusercontent.com/${REPO}/main/scripts/uninstall.sh" -o "${REMOTE_DIR}/uninstall.sh" || true
 chmod 750 "${REMOTE_DIR}/update.sh" "${REMOTE_DIR}/uninstall.sh"
 
 echo "==> Generating credentials..."

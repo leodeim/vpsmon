@@ -4,7 +4,7 @@ set -euo pipefail
 # ─────────────────────────────────────────────
 # VPSmon - Update Script
 # Usage:
-# curl -sO https://raw.githubusercontent.com/leodeim/vpsmon/main/update.sh
+# curl -sO https://raw.githubusercontent.com/leodeim/vpsmon/main/scripts/update.sh
 # sudo bash update.sh
 # ─────────────────────────────────────────────
 

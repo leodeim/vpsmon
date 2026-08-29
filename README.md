@@ -25,7 +25,7 @@
 ## Installation
 
 ```bash
-curl -sL https://raw.githubusercontent.com/leodeim/vpsmon/main/install.sh | sudo bash
+curl -sL https://raw.githubusercontent.com/leodeim/vpsmon/main/scripts/install.sh | sudo bash
 ```
 
 ## Useful Commands

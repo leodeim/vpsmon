@@ -4,7 +4,7 @@ set -euo pipefail
 # ─────────────────────────────────────────────
 # VPSmon - Uninstall Script
 # Usage:
-# curl -sO https://raw.githubusercontent.com/leodeim/vpsmon/main/uninstall.sh
+# curl -sO https://raw.githubusercontent.com/leodeim/vpsmon/main/scripts/uninstall.sh
 # sudo bash uninstall.sh
 # ─────────────────────────────────────────────
 
