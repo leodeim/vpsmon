@@ -161,6 +161,12 @@ setTheme(savedTheme);
       <tbody id="docker-table"></tbody>
     </table>
   </div>
+
+  <!-- GPU Card -->
+  <div class="card" id="gpu-card" style="grid-column: 1 / -1; display: none;">
+    <div class="card-title">GPU</div>
+    <div id="gpu-content"></div>
+  </div>
 </div>
 
 <div class="updated">Last updated: <span id="updated">--</span></div>
@@ -266,6 +272,25 @@ function connectSSE() {
         `).join("");
       } else {
         dockerCard.style.display = "none";
+      }
+
+      const gpuCard = document.getElementById("gpu-card");
+      const gpuContent = document.getElementById("gpu-content");
+      if(d.gpus && d.gpus.length > 0) {
+        gpuCard.style.display = "flex";
+        gpuContent.innerHTML = d.gpus.map(g => {
+          const memoryPercent = g.memory_total > 0 ? (g.memory_used / g.memory_total) * 100 : 0;
+          return `
+            <div class="section-title">${g.name}</div>
+            <div class="metric-row"><span>Utilization</span><span>${g.utilization.toFixed(0)}%</span></div>
+            <div class="bar-wrap"><div class="bar" style="width:${Math.min(g.utilization, 100)}%"></div><div class="bar-text">GPU ${g.utilization.toFixed(0)}%</div></div>
+            <div class="metric-row"><span>VRAM</span><span>${fmt(g.memory_used)} / ${fmt(g.memory_total)}</span></div>
+            <div class="bar-wrap"><div class="bar" style="width:${Math.min(memoryPercent, 100)}%"></div><div class="bar-text">VRAM ${memoryPercent.toFixed(0)}%</div></div>
+            <div class="metric-row"><span>Temperature</span><span>${g.temperature}°C</span></div>
+          `;
+        }).join("");
+      } else {
+        gpuCard.style.display = "none";
       }
 
       document.getElementById("updated").textContent=new Date(d.timestamp).toLocaleTimeString();

@@ -15,6 +15,7 @@
 - **Docker Integration:** Automatically detects and displays live CPU/RAM usage for running containers
 - **Process Monitoring:** Shows the top 5 processes by CPU and Memory usage
 - **Disk & Network:** Tracks used/free space across all mounts and live network Rx/Tx speeds
+- **Optional GPU Monitoring:** Shows NVIDIA (`nvidia-smi`) or AMD ROCm (`amd-smi`) GPU utilization, VRAM, and temperature when available
 - **Built-in Security:** Password-protected Web UI (bcrypt) with login rate-limiting
 - **Ultra Lightweight:** Single Go binary with zero dependencies and ~5MB RAM footprint
 

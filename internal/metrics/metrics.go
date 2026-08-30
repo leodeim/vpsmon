@@ -32,6 +32,14 @@ type DockerContainer struct {
 	Mem  float64 `json:"mem"`
 }
 
+type GPUInfo struct {
+	Name        string  `json:"name"`
+	Utilization float64 `json:"utilization"`
+	MemoryUsed  uint64  `json:"memory_used"`
+	MemoryTotal uint64  `json:"memory_total"`
+	Temperature int     `json:"temperature"`
+}
+
 type Metrics struct {
 	Hostname    string            `json:"hostname"`
 	Uptime      string            `json:"uptime"`
@@ -54,6 +62,7 @@ type Metrics struct {
 	TopCPU      []TopProcess      `json:"top_cpu"`
 	TopMem      []TopProcess      `json:"top_mem"`
 	Containers  []DockerContainer `json:"containers"`
+	GPUs        []GPUInfo         `json:"gpus"`
 	Timestamp   time.Time         `json:"timestamp"`
 }
 
@@ -138,8 +147,125 @@ func collectMetrics() Metrics {
 	m.TopCPU = getTopProcesses(false)
 	m.TopMem = getTopProcesses(true)
 	m.Containers = getDockerContainers()
+	m.GPUs = getGPUs()
 
 	return m
+}
+
+func getGPUs() []GPUInfo {
+	return append(getNVIDIAGPUs(), getAMDGPUs()...)
+}
+
+func getNVIDIAGPUs() []GPUInfo {
+	cmd := exec.Command("nvidia-smi", "--query-gpu=name,utilization.gpu,memory.used,memory.total,temperature.gpu", "--format=csv,noheader,nounits")
+	out, err := cmd.Output()
+	if err != nil {
+		return nil
+	}
+
+	var gpus []GPUInfo
+	for _, line := range strings.Split(string(out), "\n") {
+		fields := strings.Split(strings.TrimSpace(line), ",")
+		if len(fields) != 5 {
+			continue
+		}
+
+		utilization, err := strconv.ParseFloat(strings.TrimSpace(fields[1]), 64)
+		if err != nil {
+			continue
+		}
+		memoryUsed, err := strconv.ParseUint(strings.TrimSpace(fields[2]), 10, 64)
+		if err != nil {
+			continue
+		}
+		memoryTotal, err := strconv.ParseUint(strings.TrimSpace(fields[3]), 10, 64)
+		if err != nil {
+			continue
+		}
+		temperature, err := strconv.Atoi(strings.TrimSpace(fields[4]))
+		if err != nil {
+			continue
+		}
+
+		gpus = append(gpus, GPUInfo{
+			Name:        strings.TrimSpace(fields[0]),
+			Utilization: utilization,
+			MemoryUsed:  memoryUsed * 1024 * 1024,
+			MemoryTotal: memoryTotal * 1024 * 1024,
+			Temperature: temperature,
+		})
+	}
+
+	return gpus
+}
+
+func getAMDGPUs() []GPUInfo {
+	cmd := exec.Command("amd-smi", "monitor", "-tuv", "--csv")
+	out, err := cmd.Output()
+	if err != nil {
+		return nil
+	}
+
+	lines := strings.Split(strings.TrimSpace(string(out)), "\n")
+	if len(lines) < 2 {
+		return nil
+	}
+
+	columns := map[string]int{}
+	for i, column := range strings.Split(lines[0], ",") {
+		columns[strings.TrimSpace(column)] = i
+	}
+
+	required := []string{"GPU", "GPU_TEMP", "GFX_UTIL", "VRAM_USED", "VRAM_TOTAL"}
+	for _, column := range required {
+		if _, ok := columns[column]; !ok {
+			return nil
+		}
+	}
+
+	var gpus []GPUInfo
+	for _, line := range lines[1:] {
+		fields := strings.Split(line, ",")
+		if len(fields) != len(columns) {
+			continue
+		}
+
+		utilization, ok := parseAMDMetric(fields[columns["GFX_UTIL"]])
+		if !ok {
+			continue
+		}
+		memoryUsed, ok := parseAMDMetric(fields[columns["VRAM_USED"]])
+		if !ok {
+			continue
+		}
+		memoryTotal, ok := parseAMDMetric(fields[columns["VRAM_TOTAL"]])
+		if !ok {
+			continue
+		}
+		temperature, ok := parseAMDMetric(fields[columns["GPU_TEMP"]])
+		if !ok {
+			continue
+		}
+
+		gpus = append(gpus, GPUInfo{
+			Name:        "AMD GPU " + strings.TrimSpace(fields[columns["GPU"]]),
+			Utilization: utilization,
+			MemoryUsed:  uint64(memoryUsed * 1024 * 1024),
+			MemoryTotal: uint64(memoryTotal * 1024 * 1024),
+			Temperature: int(temperature),
+		})
+	}
+
+	return gpus
+}
+
+func parseAMDMetric(value string) (float64, bool) {
+	parts := strings.Fields(strings.TrimSpace(value))
+	if len(parts) == 0 {
+		return 0, false
+	}
+	metric, err := strconv.ParseFloat(parts[0], 64)
+	return metric, err == nil
 }
 
 func getDockerContainers() []DockerContainer {
