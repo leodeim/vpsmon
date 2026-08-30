@@ -6,6 +6,7 @@ import (
 	"os"
 	"os/exec"
 	"path/filepath"
+	"regexp"
 	"runtime"
 	"strconv"
 	"strings"
@@ -18,6 +19,7 @@ const historySize = 120
 var (
 	metricsMu      sync.RWMutex
 	metricsHistory []Metrics
+	containerIDRE  = regexp.MustCompile(`^[a-fA-F0-9]{12,64}$`)
 )
 
 type TopProcess struct {
@@ -27,9 +29,16 @@ type TopProcess struct {
 }
 
 type DockerContainer struct {
-	Name string  `json:"name"`
-	CPU  float64 `json:"cpu"`
-	Mem  float64 `json:"mem"`
+	ID           string  `json:"id"`
+	Name         string  `json:"name"`
+	Image        string  `json:"image"`
+	Status       string  `json:"status"`
+	Health       string  `json:"health"`
+	Uptime       string  `json:"uptime"`
+	RestartCount int     `json:"restart_count"`
+	Ports        string  `json:"ports"`
+	CPU          float64 `json:"cpu"`
+	Mem          float64 `json:"mem"`
 }
 
 type GPUInfo struct {
@@ -269,40 +278,118 @@ func parseAMDMetric(value string) (float64, bool) {
 }
 
 func getDockerContainers() []DockerContainer {
-	var containers []DockerContainer
-
-	cmd := exec.Command("docker", "stats", "--no-stream", "--format", "{{.Name}}|{{.CPUPerc}}|{{.MemPerc}}")
+	cmd := exec.Command("docker", "ps", "-a", "--no-trunc", "--format", "{{.ID}}\t{{.Names}}\t{{.Image}}\t{{.Status}}\t{{.Ports}}")
 	out, err := cmd.Output()
 	if err != nil {
-		return containers
+		return nil
 	}
 
+	containersByID := map[string]*DockerContainer{}
 	lines := strings.Split(string(out), "\n")
 	for _, line := range lines {
-		line = strings.TrimSpace(line)
-		if line == "" {
+		line = strings.TrimSuffix(line, "\r")
+		if strings.TrimSpace(line) == "" {
 			continue
 		}
-		parts := strings.Split(line, "|")
+		parts := strings.Split(line, "\t")
+		if len(parts) != 5 {
+			continue
+		}
+		containersByID[parts[0]] = &DockerContainer{
+			ID:     parts[0],
+			Name:   parts[1],
+			Image:  parts[2],
+			Status: parts[3],
+			Ports:  parts[4],
+			Health: "none",
+			Uptime: "—",
+		}
+	}
+
+	if len(containersByID) == 0 {
+		return nil
+	}
+
+	populateDockerStats(containersByID)
+	populateDockerDetails(containersByID)
+
+	containers := make([]DockerContainer, 0, len(containersByID))
+	for _, container := range containersByID {
+		containers = append(containers, *container)
+	}
+	return containers
+}
+
+func populateDockerStats(containersByID map[string]*DockerContainer) {
+	cmd := exec.Command("docker", "stats", "--no-stream", "--no-trunc", "--format", "{{.ID}}\t{{.CPUPerc}}\t{{.MemPerc}}")
+	out, err := cmd.Output()
+	if err != nil {
+		return
+	}
+
+	for _, line := range strings.Split(string(out), "\n") {
+		parts := strings.Split(strings.TrimSpace(line), "\t")
 		if len(parts) != 3 {
 			continue
 		}
-		
-		name := parts[0]
-		
-		cpuStr := strings.TrimSuffix(parts[1], "%")
-		cpu, _ := strconv.ParseFloat(cpuStr, 64)
-		
-		memStr := strings.TrimSuffix(parts[2], "%")
-		mem, _ := strconv.ParseFloat(memStr, 64)
-
-		containers = append(containers, DockerContainer{
-			Name: name,
-			CPU:  cpu,
-			Mem:  mem,
-		})
+		container, ok := containersByID[parts[0]]
+		if !ok {
+			continue
+		}
+		container.CPU, _ = strconv.ParseFloat(strings.TrimSuffix(parts[1], "%"), 64)
+		container.Mem, _ = strconv.ParseFloat(strings.TrimSuffix(parts[2], "%"), 64)
 	}
-	return containers
+}
+
+func populateDockerDetails(containersByID map[string]*DockerContainer) {
+	ids := make([]string, 0, len(containersByID))
+	for id := range containersByID {
+		ids = append(ids, id)
+	}
+
+	args := append([]string{"inspect", "--format", "{{.Id}}\t{{.RestartCount}}\t{{.State.StartedAt}}\t{{with index .State \"Health\"}}{{.Status}}{{else}}none{{end}}"}, ids...)
+	out, err := exec.Command("docker", args...).Output()
+	if err != nil {
+		return
+	}
+
+	for _, line := range strings.Split(string(out), "\n") {
+		parts := strings.Split(strings.TrimSpace(line), "\t")
+		if len(parts) != 4 {
+			continue
+		}
+		container, ok := containersByID[parts[0]]
+		if !ok {
+			continue
+		}
+		container.RestartCount, _ = strconv.Atoi(parts[1])
+		container.Health = parts[3]
+		if startedAt, err := time.Parse(time.RFC3339Nano, parts[2]); err == nil && !startedAt.IsZero() && strings.HasPrefix(container.Status, "Up ") {
+			container.Uptime = formatUptime(time.Since(startedAt))
+		}
+	}
+}
+
+func formatUptime(duration time.Duration) string {
+	if duration < 0 {
+		return "—"
+	}
+	days := int(duration.Hours()) / 24
+	hours := int(duration.Hours()) % 24
+	minutes := int(duration.Minutes()) % 60
+	return fmt.Sprintf("%dd %dh %dm", days, hours, minutes)
+}
+
+func GetContainerLogs(id string) (string, error) {
+	if !containerIDRE.MatchString(id) {
+		return "", fmt.Errorf("invalid container ID")
+	}
+
+	out, err := exec.Command("docker", "logs", "--tail", "100", "--timestamps", id).CombinedOutput()
+	if err != nil {
+		return "", fmt.Errorf("read container logs: %w", err)
+	}
+	return string(out), nil
 }
 
 func getTopProcesses(sortByMem bool) []TopProcess {

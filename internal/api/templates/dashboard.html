@@ -63,6 +63,21 @@ th, td { padding: 0.3rem 0; text-align: left; }
 .sparkline { width: 100%; height: 40px; margin-top: auto; padding-top: 1rem; }
 .updated { text-align: center; color: var(--muted); font-size: 0.8rem; margin-top: 2rem; }
 .section-title { font-size: 0.8rem; color: var(--muted); text-transform: uppercase; margin: 1rem 0 0.5rem; border-bottom: 1px dashed var(--border); }
+.container-row { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 0.5rem 1rem; padding: 0.65rem 0.75rem; border-bottom: 1px solid var(--border); }
+.container-row:last-child { border-bottom: 0; }
+.container-summary { min-width: 0; }
+.container-heading { display: flex; gap: 0.75rem; align-items: baseline; min-width: 0; }
+.container-name { flex: 0 1 auto; font-weight: bold; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.container-image { min-width: 0; color: var(--muted); font-size: 0.8rem; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.container-metrics { display: flex; flex-wrap: wrap; gap: 0.2rem 0.85rem; margin-top: 0.35rem; }
+.container-meta { font-size: 0.8rem; white-space: nowrap; }
+.container-meta-label { color: var(--muted); }
+.container-actions { align-self: center; }
+.log-button { border: 1px solid var(--border); background: transparent; color: var(--link); cursor: pointer; font-family: inherit; font-size: 0.8rem; padding: 0.35rem 0.6rem; }
+.log-button:hover { text-decoration: underline; }
+.container-log-output { display: none; grid-column: 1 / -1; max-height: 24rem; overflow: auto; margin: 0; padding: 0.75rem; border-top: 1px solid var(--border); background: var(--bar-bg); white-space: pre-wrap; font-size: 0.8rem; }
+.container-row.logs-open .container-log-output { display: block; }
+@media (max-width: 520px) { .container-row { grid-template-columns: 1fr; } .container-actions { justify-self: start; } }
 </style>
 <script>
 function setTheme(theme) {
@@ -156,10 +171,7 @@ setTheme(savedTheme);
   <!-- Docker Card -->
   <div class="card" id="docker-card" style="grid-column: 1 / -1; display: none;">
     <div class="card-title">Docker Containers</div>
-    <table>
-      <thead><tr><th>Name</th><th class="td-right">CPU</th><th class="td-right">RAM</th></tr></thead>
-      <tbody id="docker-table"></tbody>
-    </table>
+    <div class="container-list" id="docker-list"></div>
   </div>
 
   <!-- GPU Card -->
@@ -181,6 +193,50 @@ function fmt(bytes){
 function setBar(id,pct){
   const el=document.getElementById(id);
   if (el) el.style.width=Math.min(pct,100)+"%";
+}
+function escapeHTML(value) {
+  const element = document.createElement("div");
+  element.textContent = String(value || "—");
+  return element.innerHTML;
+}
+window.vpsmonOpenContainerLog = { id: null, text: "" };
+function updateOpenContainerLog(id, text) {
+  if (window.vpsmonOpenContainerLog.id !== id) return;
+  window.vpsmonOpenContainerLog.text = text;
+  const row = document.querySelector(`.container-row[data-container-id="${id}"]`);
+  if (row) row.querySelector(".container-log-output").textContent = text;
+}
+async function toggleContainerLogs(button, id) {
+  const row = button.closest(".container-row");
+  const output = row.querySelector(".container-log-output");
+  if (window.vpsmonOpenContainerLog.id === id) {
+    window.vpsmonOpenContainerLog = { id: null, text: "" };
+    row.classList.remove("logs-open");
+    button.textContent = "logs";
+    button.setAttribute("aria-expanded", "false");
+    return;
+  }
+
+  if (window.vpsmonOpenContainerLog.id) {
+    const previousRow = document.querySelector(`.container-row[data-container-id="${window.vpsmonOpenContainerLog.id}"]`);
+    if (previousRow) {
+      previousRow.classList.remove("logs-open");
+      const previousButton = previousRow.querySelector(".log-button");
+      previousButton.textContent = "logs";
+      previousButton.setAttribute("aria-expanded", "false");
+    }
+  }
+  window.vpsmonOpenContainerLog = { id, text: "Loading…" };
+  row.classList.add("logs-open");
+  button.textContent = "hide logs";
+  button.setAttribute("aria-expanded", "true");
+  output.textContent = window.vpsmonOpenContainerLog.text;
+  try {
+    const response = await fetch(`/api/containers/${encodeURIComponent(id)}/logs`);
+    updateOpenContainerLog(id, response.ok ? await response.text() || "No logs available." : "Unable to load logs.");
+  } catch (error) {
+    updateOpenContainerLog(id, "Unable to load logs.");
+  }
 }
 function drawSparkline(svgId, data, color) {
     const svg = document.getElementById(svgId);
@@ -260,16 +316,37 @@ function connectSSE() {
       });
       
       const dockerCard = document.getElementById("docker-card");
-      const dockerTbody = document.getElementById("docker-table");
+      const dockerList = document.getElementById("docker-list");
       if(d.containers && d.containers.length > 0) {
+        if (window.vpsmonOpenContainerLog.id && !d.containers.some(c => c.id === window.vpsmonOpenContainerLog.id)) {
+          window.vpsmonOpenContainerLog = { id: null, text: "" };
+        }
         dockerCard.style.display = "flex";
-        dockerTbody.innerHTML = d.containers.map(c => `
-          <tr>
-            <td>${c.name}</td>
-            <td class="td-right">${c.cpu.toFixed(2)}%</td>
-            <td class="td-right">${c.mem.toFixed(2)}%</td>
-          </tr>
+        // Keep an expanded log panel intact while live metrics arrive. Replacing
+        // this markup every five seconds would otherwise close the panel and
+        // discard the log text the user is reading.
+        if (!(window.vpsmonOpenContainerLog.id && dockerList.querySelector(".container-row.logs-open"))) {
+          dockerList.innerHTML = d.containers.map(c => `
+          <div class="container-row${c.id === window.vpsmonOpenContainerLog.id ? " logs-open" : ""}" data-container-id="${c.id}">
+            <div class="container-summary">
+              <div class="container-heading"><span class="container-name" title="${escapeHTML(c.name)}">${escapeHTML(c.name)}</span><span class="container-image" title="${escapeHTML(c.image)}">${escapeHTML(c.image)}</span></div>
+              <div class="container-metrics">
+                <span class="container-meta"><span class="container-meta-label">status</span> ${escapeHTML(c.status)}</span>
+                <span class="container-meta"><span class="container-meta-label">health</span> ${escapeHTML(c.health)}</span>
+                <span class="container-meta"><span class="container-meta-label">up</span> ${escapeHTML(c.uptime)}</span>
+                <span class="container-meta"><span class="container-meta-label">↻</span> ${c.restart_count}</span>
+                <span class="container-meta"><span class="container-meta-label">CPU</span> ${c.cpu.toFixed(2)}%</span>
+                <span class="container-meta"><span class="container-meta-label">RAM</span> ${c.mem.toFixed(2)}%</span>
+              </div>
+            </div>
+            <div class="container-actions"><button class="log-button" type="button" data-container-id="${c.id}" aria-expanded="${c.id === window.vpsmonOpenContainerLog.id}">${c.id === window.vpsmonOpenContainerLog.id ? "hide logs" : "logs"}</button></div>
+            <pre class="container-log-output">${c.id === window.vpsmonOpenContainerLog.id ? escapeHTML(window.vpsmonOpenContainerLog.text) : ""}</pre>
+          </div>
         `).join("");
+          dockerList.querySelectorAll(".log-button[data-container-id]").forEach(button => {
+            button.addEventListener("click", () => toggleContainerLogs(button, button.dataset.containerId));
+          });
+        }
       } else {
         dockerCard.style.display = "none";
       }

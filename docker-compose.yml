@@ -12,3 +12,6 @@ services:
     environment:
       # Pass your pre-generated hash here or in a .env file next to this docker-compose.yml
       - MONITOR_PASS_HASH=${MONITOR_PASS_HASH}
+    volumes:
+      # Required for Docker container metadata, stats, and on-demand logs.
+      - /var/run/docker.sock:/var/run/docker.sock:ro

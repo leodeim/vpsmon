@@ -145,6 +145,27 @@ func StartServer(listenAddr, username, expectedPassHash string) {
 		}
 	})
 
+	mux.HandleFunc("/api/containers/", func(w http.ResponseWriter, r *http.Request) {
+		if !authenticated(r) {
+			http.Error(w, "unauthorized", http.StatusUnauthorized)
+			return
+		}
+
+		id := strings.TrimSuffix(strings.TrimPrefix(r.URL.Path, "/api/containers/"), "/logs")
+		if r.Method != http.MethodGet || id == "" || r.URL.Path != "/api/containers/"+id+"/logs" {
+			http.NotFound(w, r)
+			return
+		}
+
+		logs, err := metrics.GetContainerLogs(id)
+		if err != nil {
+			http.Error(w, "unable to read container logs", http.StatusNotFound)
+			return
+		}
+		w.Header().Set("Content-Type", "text/plain; charset=utf-8")
+		fmt.Fprint(w, logs)
+	})
+
 	log.Printf("vpsmon starting on %s", listenAddr)
 	if err := http.ListenAndServe(listenAddr, mux); err != nil {
 		log.Fatal(err)

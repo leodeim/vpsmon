@@ -12,7 +12,7 @@
 ## Features
 
 - **Live System Metrics:** CPU, Memory, Swap, and Load Average
-- **Docker Integration:** Automatically detects and displays live CPU/RAM usage for running containers
+- **Docker Integration:** Shows container image, status, health, uptime, restart count, ports, CPU/RAM, and recent logs
 - **Process Monitoring:** Shows the top 5 processes by CPU and Memory usage
 - **Disk & Network:** Tracks used/free space across all mounts and live network Rx/Tx speeds
 - **Optional GPU Monitoring:** Shows NVIDIA (`nvidia-smi`) or AMD ROCm (`amd-smi`) GPU utilization, VRAM, and temperature when available
@@ -47,6 +47,10 @@ Once installed on your VPS, you can manage the monitor using these commands:
 | `MONITOR_ADDR` | `:8088` | Listen address |
 | `MONITOR_USER` | `admin` | Web UI username |
 | `MONITOR_PASS_HASH` | (hash of `changeme`) | Web UI password (bcrypt hash) |
+
+## Docker Container Visibility
+
+The Docker deployment mounts `/var/run/docker.sock` so vpsmon can inspect containers and read their last 100 log lines on demand. Docker socket access is effectively privileged even when mounted read-only, so keep vpsmon behind its authentication and deploy it only on hosts you trust.
 
 ## Reverse Proxy (HTTPS)
 

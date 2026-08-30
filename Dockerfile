@@ -16,10 +16,10 @@ WORKDIR /app
 
 # Install procps so we have the standard 'ps' command for the Top Processes feature.
 # The busybox 'ps' does not support the flags we need.
-RUN apk add --no-cache procps
+RUN apk add --no-cache procps docker-cli
 
 COPY --from=builder /app/vpsmon .
 
-EXPOSE 8080
+EXPOSE 8088
 
 CMD ["./vpsmon"]
