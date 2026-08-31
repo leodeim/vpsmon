@@ -77,6 +77,20 @@ th, td { padding: 0.3rem 0; text-align: left; }
 .log-button:hover { text-decoration: underline; }
 .container-log-output { display: none; grid-column: 1 / -1; max-height: 24rem; overflow: auto; margin: 0; padding: 0.75rem; border-top: 1px solid var(--border); background: var(--bar-bg); white-space: pre-wrap; font-size: 0.8rem; }
 .container-row.logs-open .container-log-output { display: block; }
+.card-scroll { max-height: 20rem; overflow: auto; }
+.compact-empty { color: var(--muted); font-size: 0.8rem; padding: 0.5rem 0; text-align: center; }
+.socket-row { display: flex; align-items: baseline; justify-content: space-between; gap: 0.75rem; padding: 0.4rem 0; border-bottom: 1px dashed var(--border); font-size: 0.85rem; }
+.socket-row:last-child { border-bottom: 0; }
+.socket-endpoint { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.socket-protocol { color: var(--muted); font-size: 0.75rem; margin-right: 0.45rem; }
+.socket-scope { white-space: nowrap; }
+.socket-scope-wildcard { color: var(--alert); font-weight: bold; }
+.disk-row { padding: 0.4rem 0 0.6rem; border-bottom: 1px dashed var(--border); }
+.disk-row:last-child { border-bottom: 0; padding-bottom: 0; }
+.disk-mount { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 0.85rem; font-weight: bold; }
+.disk-stats { display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem; margin: 0.5rem 0; }
+.disk-stat { display: flex; justify-content: space-between; gap: 0.4rem; font-size: 0.8rem; }
+.disk-stat-label { color: var(--muted); }
 @media (max-width: 520px) { .container-row { grid-template-columns: 1fr; } .container-actions { justify-self: start; } }
 </style>
 <script>
@@ -159,13 +173,22 @@ setTheme(savedTheme);
     <svg class="sparkline" id="net-chart"></svg>
   </div>
 
+  <!-- Listening Sockets Card -->
+  <div class="card">
+    <div class="card-title">Listening Sockets (<span id="listener-count">0</span>)</div>
+    <div class="card-scroll" id="listener-list"></div>
+  </div>
+
   <!-- Disks Card -->
-  <div class="card" style="grid-column: 1 / -1;">
+  <div class="card">
     <div class="card-title">Disks</div>
-    <table>
-      <thead><tr><th>Mount</th><th class="td-right">Used</th><th class="td-right">Free</th><th class="td-right">Total</th></tr></thead>
-      <tbody id="disk-table"></tbody>
-    </table>
+    <div class="card-scroll" id="disk-list"></div>
+  </div>
+
+  <!-- GPU Card -->
+  <div class="card" id="gpu-card" style="display: none;">
+    <div class="card-title">GPU</div>
+    <div class="card-scroll" id="gpu-content"></div>
   </div>
 
   <!-- Docker Card -->
@@ -174,11 +197,6 @@ setTheme(savedTheme);
     <div class="container-list" id="docker-list"></div>
   </div>
 
-  <!-- GPU Card -->
-  <div class="card" id="gpu-card" style="grid-column: 1 / -1; display: none;">
-    <div class="card-title">GPU</div>
-    <div id="gpu-content"></div>
-  </div>
 </div>
 
 <div class="updated">Last updated: <span id="updated">--</span></div>
@@ -299,21 +317,90 @@ function connectSSE() {
       document.getElementById("procs").textContent=d.processes;
       document.getElementById("net-rx").textContent=fmt(d.net_rx_speed) + "/s";
       document.getElementById("net-tx").textContent=fmt(d.net_tx_speed) + "/s";
+
+      const listeners = d.listeners || [];
+      document.getElementById("listener-count").textContent = listeners.length;
+      const listenerList = document.getElementById("listener-list");
+      listenerList.replaceChildren();
+      if (listeners.length === 0) {
+        const empty = document.createElement("div");
+        empty.className = "compact-empty";
+        empty.textContent = "No listening sockets detected";
+        listenerList.appendChild(empty);
+      } else {
+        listeners.forEach(socket => {
+          const row = document.createElement("div");
+          row.className = "socket-row";
+
+          const endpoint = document.createElement("div");
+          endpoint.className = "socket-endpoint";
+          const address = socket.address.includes(":") ? `[${socket.address}]` : socket.address;
+          endpoint.title = `${socket.protocol.toUpperCase()} ${address}:${socket.port}`;
+          const protocol = document.createElement("span");
+          protocol.className = "socket-protocol";
+          protocol.textContent = socket.protocol.toUpperCase();
+          endpoint.append(protocol, `${address}:${socket.port}`);
+
+          const scope = document.createElement("div");
+          scope.className = "socket-scope" + (socket.scope === "all interfaces" ? " socket-scope-wildcard" : "");
+          scope.textContent = socket.scope === "loopback" ? "local only" : socket.scope;
+          row.append(endpoint, scope);
+          listenerList.appendChild(row);
+        });
+      }
       
       renderTop("top-cpu", d.top_cpu, false);
       renderTop("top-mem", d.top_mem, true);
       
-      const tbody=document.getElementById("disk-table");
-      tbody.innerHTML="";
-      (d.disks||[]).forEach(dk=>{
-        const tr=document.createElement("tr");
-        tr.innerHTML="<td>"+dk.mount+"</td><td class='td-right'>"+fmt(dk.used)+"</td><td class='td-right'>"+fmt(dk.free)+"</td><td class='td-right'>"+fmt(dk.total)+"</td>";
-        tbody.appendChild(tr);
-        
-        const trBar=document.createElement("tr");
-        trBar.innerHTML="<td colspan='4' style='padding-top:0;'><div class='bar-wrap' style='height:1rem; margin-bottom:0.5rem;'><div class='bar' style='width:"+dk.percent.toFixed(0)+"%'></div><div class='bar-text'>Disk "+dk.percent.toFixed(2)+"%</div></div></td>";
-        tbody.appendChild(trBar);
-      });
+      const disks = d.disks || [];
+      const diskList = document.getElementById("disk-list");
+      diskList.replaceChildren();
+      if (disks.length === 0) {
+        const empty = document.createElement("div");
+        empty.className = "compact-empty";
+        empty.textContent = "No disks detected";
+        diskList.appendChild(empty);
+      } else {
+        disks.forEach(disk => {
+          const row = document.createElement("div");
+          row.className = "disk-row";
+
+          const mount = document.createElement("div");
+          mount.className = "disk-mount";
+          mount.textContent = disk.mount;
+          mount.title = disk.mount;
+
+          const stats = document.createElement("div");
+          stats.className = "disk-stats";
+          [["Used", disk.used], ["Free", disk.free]].forEach(([label, value]) => {
+            const stat = document.createElement("div");
+            stat.className = "disk-stat";
+            const statLabel = document.createElement("span");
+            statLabel.className = "disk-stat-label";
+            statLabel.textContent = label;
+            const statValue = document.createElement("span");
+            statValue.textContent = fmt(value);
+            stat.append(statLabel, statValue);
+            stats.appendChild(stat);
+          });
+
+          const barWrap = document.createElement("div");
+          barWrap.className = "bar-wrap";
+          barWrap.style.height = "1rem";
+          barWrap.style.marginBottom = "0";
+          const bar = document.createElement("div");
+          bar.className = "bar";
+          bar.style.width = Math.min(Math.max(disk.percent, 0), 100) + "%";
+          const barText = document.createElement("div");
+          barText.className = "bar-text";
+          barText.style.lineHeight = "1rem";
+          barText.textContent = `${disk.percent.toFixed(2)}% used · ${fmt(disk.total)} total`;
+          barWrap.append(bar, barText);
+
+          row.append(mount, stats, barWrap);
+          diskList.appendChild(row);
+        });
+      }
       
       const dockerCard = document.getElementById("docker-card");
       const dockerList = document.getElementById("docker-list");

@@ -72,6 +72,7 @@ type Metrics struct {
 	TopMem      []TopProcess      `json:"top_mem"`
 	Containers  []DockerContainer `json:"containers"`
 	GPUs        []GPUInfo         `json:"gpus"`
+	Listeners   []ListeningSocket `json:"listeners,omitempty"`
 	Timestamp   time.Time         `json:"timestamp"`
 }
 
@@ -157,6 +158,7 @@ func collectMetrics() Metrics {
 	m.TopMem = getTopProcesses(true)
 	m.Containers = getDockerContainers()
 	m.GPUs = getGPUs()
+	m.Listeners = getListeningSockets()
 
 	return m
 }
@@ -588,7 +590,8 @@ func collectAndStore() {
 	defer metricsMu.Unlock()
 
 	if len(metricsHistory) > 0 {
-		last := metricsHistory[len(metricsHistory)-1]
+		lastIndex := len(metricsHistory) - 1
+		last := metricsHistory[lastIndex]
 		dt := m.Timestamp.Sub(last.Timestamp).Seconds()
 		if dt > 0 {
 			if m.NetRx >= last.NetRx {
@@ -598,6 +601,8 @@ func collectAndStore() {
 				m.NetTxSpeed = float64(m.NetTx-last.NetTx) / dt
 			}
 		}
+
+		metricsHistory[lastIndex].Listeners = nil
 	}
 
 	metricsHistory = append(metricsHistory, m)
