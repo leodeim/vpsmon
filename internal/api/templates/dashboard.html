@@ -25,8 +25,8 @@
   --muted: #94a9bd;
   --border: #333333;
   --bar-bg: #202d36;
-  --accent-start: #63b7b1;
-  --accent-end: #7599d1;
+  --accent-start: #28736f;
+  --accent-end: #466797;
   --bar-fill: linear-gradient(90deg, var(--accent-start), var(--accent-end));
   --alert: #ff4444;
   --link: #7599d1;
@@ -372,7 +372,7 @@ function connectSSE() {
 
           const stats = document.createElement("div");
           stats.className = "disk-stats";
-          [["Used", disk.used], ["Free", disk.free]].forEach(([label, value]) => {
+          [["Total", disk.total], ["Free", disk.free]].forEach(([label, value]) => {
             const stat = document.createElement("div");
             stat.className = "disk-stat";
             const statLabel = document.createElement("span");
@@ -394,7 +394,7 @@ function connectSSE() {
           const barText = document.createElement("div");
           barText.className = "bar-text";
           barText.style.lineHeight = "1rem";
-          barText.textContent = `${disk.percent.toFixed(2)}% used · ${fmt(disk.total)} total`;
+          barText.textContent = `${disk.percent.toFixed(2)}% used`;
           barWrap.append(bar, barText);
 
           row.append(mount, stats, barWrap);
