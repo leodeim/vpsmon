@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"log"
 	"os"
+	"strings"
 
 	"golang.org/x/crypto/bcrypt"
 	
@@ -37,6 +38,11 @@ func main() {
 
 	defaultHash, _ := bcrypt.GenerateFromPassword([]byte("changeme"), bcrypt.DefaultCost)
 	expectedPassHash := envOr("MONITOR_PASS_HASH", string(defaultHash))
+
+	if v := os.Getenv("MONITOR_NO_AUTH"); v == "1" || strings.EqualFold(v, "true") {
+		log.Println("WARNING: MONITOR_NO_AUTH is set; the dashboard is reachable without a password. Only use this on a trusted network.")
+		api.SetAuthDisabled(true)
+	}
 
 	metrics.StartCollector()
 	api.StartServer(listenAddr, username, expectedPassHash)

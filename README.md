@@ -48,6 +48,7 @@ Once installed on your VPS, you can manage the monitor using these commands:
 | `MONITOR_ADDR` | `:8088` | Listen address |
 | `MONITOR_USER` | `admin` | Web UI username |
 | `MONITOR_PASS_HASH` | (hash of `changeme`) | Web UI password (bcrypt hash) |
+| `MONITOR_NO_AUTH` | (unset) | Set to `true` to disable the login entirely. Only for dashboards bound to a trusted interface (e.g. a Tailscale/WireGuard IP), never on a public address. |
 
 ## Docker Container Visibility
 
