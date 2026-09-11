@@ -224,6 +224,62 @@ th, td { padding: 0.3rem 0; text-align: left; }
   [data-skin="modern"] .controls { flex-wrap: wrap; justify-content: flex-end; gap: 0.4rem; }
 }
 </style>
+<style>
+/* Modern dashboard: quiet surfaces, clear hierarchy, and readable live values. */
+.overview { display: none; }
+[data-skin="modern"] { --bg: #f5f6f8; --text: #202b38; --muted: #667587; --border: #e3e7ec; --bar-bg: #e9eef1; --accent-start: #138b79; --accent-end: #36bfa7; --link: #087f70; --surface: #ffffff; }
+[data-skin="modern"][data-theme="dark"] { --bg: #101519; --text: #e7edf0; --muted: #94a3ad; --border: #2a343b; --bar-bg: #29353c; --accent-start: #329f91; --accent-end: #70dfc5; --link: #70dfc5; --surface: #192126; }
+[data-skin="modern"] body { max-width: 1320px; padding: 28px 32px 40px; font-size: 14px; font-variant-numeric: tabular-nums; }
+[data-skin="modern"] .header { padding-bottom: 24px; margin-bottom: 30px; border-bottom: 1px solid var(--border); }
+[data-skin="modern"] .header-title { gap: 12px; font-size: 21px; }
+[data-skin="modern"] .header-title::before { border-radius: 5px; width: 22px; height: 22px; background: repeating-linear-gradient(0deg, var(--link) 0 3px, transparent 3px 6px); box-shadow: none; }
+[data-skin="modern"] #hostname { border-left: 1px solid var(--border); padding-left: 12px; letter-spacing: 0; }
+[data-skin="modern"] .controls a, [data-skin="modern"] .theme-switch { background: var(--surface); padding: 9px 12px; border-radius: 8px; }
+[data-skin="modern"] .overview { display: flex; align-items: end; justify-content: space-between; gap: 16px; margin-bottom: 24px; }
+[data-skin="modern"] .overview h1 { font-size: 30px; font-weight: 600; letter-spacing: -1px; margin-bottom: 7px; }
+[data-skin="modern"] .overview p { color: var(--muted); font-size: 13px; line-height: 1.5; }
+[data-skin="modern"] .live-label { color: var(--link); background: var(--surface); border: 1px solid var(--border); padding: 7px 10px; border-radius: 20px; font-size: 11px; white-space: nowrap; }
+[data-skin="modern"] .grid { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 18px; align-items: stretch; }
+[data-skin="modern"] .card { min-width: 0; padding: 24px; border-radius: 16px; background: var(--surface); box-shadow: 0 3px 12px rgb(0 0 0 / 0.025); }
+[data-skin="modern"] .card-title { color: var(--text); font-size: 13px; font-weight: 600; text-transform: none; letter-spacing: 0; margin-bottom: 18px; }
+[data-skin="modern"] .modern-gauge { width: 166px; height: 166px; margin: 0 auto 16px; }
+[data-skin="modern"] .gauge-content strong { font-size: 32px; font-weight: 600; letter-spacing: -1.5px; }
+[data-skin="modern"] .gauge-content span { font-size: 9px; letter-spacing: 1.3px; margin-top: 9px; }
+[data-skin="modern"] .gauge-ring, [data-skin="modern"] .gauge-track { stroke-width: 7; }
+[data-skin="modern"] .metric-row { font-size: 12px; line-height: 1.6; color: var(--muted); }
+[data-skin="modern"] .metric-row span:last-child { color: var(--text); font-weight: 500; }
+[data-skin="modern"] .sparkline { height: 56px; padding-top: 12px; margin: 8px 0; }
+[data-skin="modern"] .section-title { border-top: 1px solid var(--border); padding-top: 15px; margin-top: 14px; font-size: 10px; letter-spacing: 1px; }
+[data-skin="modern"] table { font-size: 12px; }
+[data-skin="modern"] td { padding: 6px 0; }
+[data-skin="modern"] .socket-row { font-size: 12px; padding: 12px 0; border-bottom-style: solid; align-items: center; }
+[data-skin="modern"] .socket-scope { font-size: 10px; background: var(--bar-bg); border-radius: 5px; padding: 4px 6px; }
+[data-skin="modern"] .socket-scope-wildcard { color: var(--muted); font-weight: 500; }
+[data-skin="modern"] .disk-stats { grid-template-columns: 1fr; gap: 8px; margin: 16px 0; }
+[data-skin="modern"] .disk-stat { font-size: 12px; }
+[data-skin="modern"] .disk-usage { background: transparent; color: var(--link); padding-left: 0; }
+[data-skin="modern"] .container-row { padding: 18px 0; }
+[data-skin="modern"] .container-heading { flex-wrap: wrap; gap: 6px 12px; }
+[data-skin="modern"] .container-name { font-size: 13px; font-weight: 600; }
+[data-skin="modern"] .container-image { font-size: 11px; }
+[data-skin="modern"] .container-metrics { gap: 8px 16px; margin-top: 12px; }
+[data-skin="modern"] .container-meta { font-size: 11px; white-space: normal; overflow-wrap: anywhere; }
+[data-skin="modern"] .container-meta-label { margin-right: 4px; }
+[data-skin="modern"] .log-button { padding: 7px 12px; font-size: 11px; background: var(--bg); border-radius: 7px; }
+[data-skin="modern"] .updated { font-size: 11px; margin-top: 24px; }
+button:focus-visible, a:focus-visible { outline: 2px solid var(--link); outline-offset: 4px; }
+@media (max-width: 1000px) { [data-skin="modern"] .grid { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+@media (max-width: 600px) {
+  [data-skin="modern"] body { padding: 20px 16px; }
+  [data-skin="modern"] .grid { grid-template-columns: minmax(0, 1fr); gap: 14px; }
+  [data-skin="modern"] .card { padding: 20px; }
+  [data-skin="modern"] #hostname { display: block; border: 0; padding: 0; font-size: 10px !important; }
+  [data-skin="modern"] .header-title { flex-wrap: wrap; gap: 8px; }
+  [data-skin="modern"] .overview h1 { font-size: 26px; }
+  [data-skin="modern"] .overview { align-items: start; }
+}
+@media (prefers-reduced-motion: reduce) { .bar, [data-skin="modern"] .gauge-ring { transition: none; } }
+</style>
 <script>
 function setTheme(theme) {
   document.documentElement.setAttribute('data-theme', theme);
@@ -252,6 +308,7 @@ setTheme(savedTheme);
   </div>
 </div>
 
+<div class="overview"><div><h1>System overview</h1><p>Resource usage and services, at a glance.</p></div><span class="live-label" id="live-label">Connecting</span></div>
 <div class="grid">
   <!-- CPU Card -->
   <div class="card">
@@ -359,8 +416,8 @@ function setGauge(id, valueId, pct) {
   const radius = 49;
   const circumference = 2 * Math.PI * radius;
   const ring = gauge.querySelector(".gauge-ring");
-  ring.style.strokeDasharray = circumference;
-  ring.style.strokeDashoffset = circumference * (1 - clamped / 100);
+  ring.style.strokeDasharray = circumference + 'px';
+  ring.style.strokeDashoffset = (circumference * (1 - clamped / 100)) + 'px';
   value.textContent = clamped.toFixed(1) + "%";
 }
 function escapeHTML(value) {
@@ -438,6 +495,7 @@ function connectSSE() {
   
   evtSource.onmessage = function(event) {
     document.getElementById("offline-banner").style.display = "none";
+    document.getElementById("live-label").textContent = "● Live metrics";
     try {
       const history = JSON.parse(event.data);
       if(history.length === 0) return;
@@ -632,6 +690,7 @@ function connectSSE() {
   evtSource.onerror = async function(err) {
     console.error("SSE error", err);
     document.getElementById("offline-banner").style.display = "block";
+    document.getElementById("live-label").textContent = "Reconnecting";
     
     try {
       const r = await fetch("/");

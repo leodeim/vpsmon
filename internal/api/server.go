@@ -27,6 +27,8 @@ func StartServer(listenAddr, username, expectedPassHash, skin string) {
 		skin = "terminal"
 	}
 	dashboardHTML = []byte(strings.Replace(string(dashboardHTML), "{{SKIN}}", skin, 1))
+	loginHTML = []byte(strings.Replace(string(loginHTML), "{{SKIN}}", skin, 1))
+	loginErrorHTML = []byte(strings.Replace(string(loginErrorHTML), "{{SKIN}}", skin, 1))
 
 	mux := http.NewServeMux()
 
