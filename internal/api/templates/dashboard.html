@@ -227,17 +227,18 @@ th, td { padding: 0.3rem 0; text-align: left; }
 <style>
 /* Modern dashboard: quiet surfaces, clear hierarchy, and readable live values. */
 .overview { display: none; }
+.brand-mark { display: none; }
 [data-skin="modern"] { --bg: #f5f6f8; --text: #202b38; --muted: #667587; --border: #e3e7ec; --bar-bg: #e9eef1; --accent-start: #138b79; --accent-end: #36bfa7; --link: #087f70; --surface: #ffffff; }
 [data-skin="modern"][data-theme="dark"] { --bg: #101519; --text: #e7edf0; --muted: #94a3ad; --border: #2a343b; --bar-bg: #29353c; --accent-start: #329f91; --accent-end: #70dfc5; --link: #70dfc5; --surface: #192126; }
 [data-skin="modern"] body { max-width: 1320px; padding: 28px 32px 40px; font-size: 14px; font-variant-numeric: tabular-nums; }
 [data-skin="modern"] .header { padding-bottom: 24px; margin-bottom: 30px; border-bottom: 1px solid var(--border); }
 [data-skin="modern"] .header-title { gap: 12px; font-size: 21px; }
-[data-skin="modern"] .header-title::before { border-radius: 5px; width: 22px; height: 22px; background: repeating-linear-gradient(0deg, var(--link) 0 3px, transparent 3px 6px); box-shadow: none; }
+[data-skin="modern"] .header-title::before { display: none; }
+[data-skin="modern"] .brand-mark { display: block; width: 22px; height: 22px; }
 [data-skin="modern"] #hostname { border-left: 1px solid var(--border); padding-left: 12px; letter-spacing: 0; }
 [data-skin="modern"] .controls a, [data-skin="modern"] .theme-switch { background: var(--surface); padding: 9px 12px; border-radius: 8px; }
 [data-skin="modern"] .overview { display: flex; align-items: end; justify-content: space-between; gap: 16px; margin-bottom: 24px; }
 [data-skin="modern"] .overview h1 { font-size: 30px; font-weight: 600; letter-spacing: -1px; margin-bottom: 7px; }
-[data-skin="modern"] .overview p { color: var(--muted); font-size: 13px; line-height: 1.5; }
 [data-skin="modern"] .live-label { color: var(--link); background: var(--surface); border: 1px solid var(--border); padding: 7px 10px; border-radius: 20px; font-size: 11px; white-space: nowrap; }
 [data-skin="modern"] .grid { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 18px; align-items: stretch; }
 [data-skin="modern"] .card { min-width: 0; padding: 24px; border-radius: 16px; background: var(--surface); box-shadow: 0 3px 12px rgb(0 0 0 / 0.025); }
@@ -275,8 +276,8 @@ button:focus-visible, a:focus-visible { outline: 2px solid var(--link); outline-
   [data-skin="modern"] .card { padding: 20px; }
   [data-skin="modern"] #hostname { display: block; border: 0; padding: 0; font-size: 10px !important; }
   [data-skin="modern"] .header-title { flex-wrap: wrap; gap: 8px; }
-  [data-skin="modern"] .overview h1 { font-size: 26px; }
   [data-skin="modern"] .overview { align-items: start; }
+  [data-skin="modern"] .overview h1 { font-size: 26px; }
 }
 @media (prefers-reduced-motion: reduce) { .bar, [data-skin="modern"] .gauge-ring { transition: none; } }
 </style>
@@ -300,7 +301,7 @@ setTheme(savedTheme);
 
 <div class="header">
   <div>
-    <div class="header-title">vpsmon <span id="hostname" style="font-size: 0.85rem; font-weight: normal; color: var(--muted);">--</span></div>
+    <div class="header-title"><img class="brand-mark" src="/favicon.ico" alt="">vpsmon <span id="hostname" style="font-size: 0.85rem; font-weight: normal; color: var(--muted);">--</span></div>
   </div>
   <div class="controls">
     <button class="theme-switch" id="theme-btn" onclick="toggleTheme()">Dark Mode</button>
@@ -308,7 +309,7 @@ setTheme(savedTheme);
   </div>
 </div>
 
-<div class="overview"><div><h1>System overview</h1><p>Resource usage and services, at a glance.</p></div><span class="live-label" id="live-label">Connecting</span></div>
+<div class="overview"><span class="live-label" id="live-label">Connecting</span></div>
 <div class="grid">
   <!-- CPU Card -->
   <div class="card">
