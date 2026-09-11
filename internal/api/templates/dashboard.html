@@ -92,6 +92,136 @@ th, td { padding: 0.3rem 0; text-align: left; }
 .disk-stat { display: flex; justify-content: space-between; gap: 0.4rem; font-size: 0.8rem; }
 .disk-stat-label { color: var(--muted); }
 @media (max-width: 520px) { .container-row { grid-template-columns: 1fr; } .container-actions { justify-self: start; } }
+
+.modern-gauge { display: none; }
+.disk-usage { display: none; }
+
+/* The modern skin deliberately reuses the same markup and metric stream. Its CSS is watched with polling in development. */
+[data-skin="modern"] {
+  --bg: #f4f7fb;
+  --text: #172033;
+  --muted: #64748b;
+  --border: #e2e8f0;
+  --bar-bg: #e8eef7;
+  --accent-start: #4f46e5;
+  --accent-end: #06b6d4;
+  --alert: #dc2626;
+  --link: #4f46e5;
+}
+[data-skin="modern"][data-theme="dark"] {
+  --bg: #0f172a;
+  --text: #e2e8f0;
+  --muted: #94a3b8;
+  --border: #26344d;
+  --bar-bg: #1e293b;
+  --accent-start: #818cf8;
+  --accent-end: #22d3ee;
+  --alert: #fb7185;
+  --link: #a5b4fc;
+}
+[data-skin="modern"] body {
+  font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  max-width: 1440px;
+  padding: 2rem;
+}
+[data-skin="modern"] .header {
+  align-items: center;
+  margin-bottom: 2.25rem;
+}
+[data-skin="modern"] .header-title { font-size: 1.35rem; letter-spacing: -0.04em; }
+[data-skin="modern"] .header-title::before {
+  content: "";
+  width: 0.75rem;
+  height: 0.75rem;
+  border-radius: 50%;
+  background: #22c55e;
+  box-shadow: 0 0 0 4px color-mix(in srgb, #22c55e 15%, transparent);
+}
+[data-skin="modern"] .controls { gap: 0.75rem; }
+[data-skin="modern"] .controls a,
+[data-skin="modern"] .theme-switch,
+[data-skin="modern"] .skin-switch {
+  border: 1px solid var(--border);
+  border-radius: 0.5rem;
+  background: color-mix(in srgb, var(--bg) 82%, var(--text));
+  color: var(--text);
+  padding: 0.5rem 0.7rem;
+  font-size: 0.8rem;
+  text-decoration: none;
+}
+[data-skin="modern"] .controls a:hover,
+[data-skin="modern"] .theme-switch:hover,
+[data-skin="modern"] .skin-switch:hover { border-color: var(--link); text-decoration: none; }
+[data-skin="modern"] .grid { gap: 1rem; }
+[data-skin="modern"] .card {
+  border: 1px solid var(--border);
+  border-radius: 0.85rem;
+  padding: 1.25rem;
+  background: color-mix(in srgb, var(--bg) 92%, white);
+  box-shadow: 0 1px 2px rgb(15 23 42 / 0.04), 0 8px 24px rgb(15 23 42 / 0.04);
+}
+[data-skin="modern"] .card-title {
+  position: static;
+  padding: 0;
+  margin-bottom: 1.25rem;
+  background: transparent;
+  color: var(--muted);
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+[data-skin="modern"] .metric-row { font-size: 0.875rem; }
+[data-skin="modern"] .metric-row span:last-child { font-weight: 650; }
+[data-skin="modern"] .modern-gauge {
+  display: grid;
+  place-items: center;
+  position: relative;
+  width: 9rem;
+  height: 9rem;
+  margin: 0.25rem auto 0.75rem;
+}
+[data-skin="modern"] .modern-gauge svg { width: 100%; height: 100%; transform: rotate(-90deg); }
+[data-skin="modern"] .gauge-track,
+[data-skin="modern"] .gauge-ring { fill: none; stroke-width: 9; }
+[data-skin="modern"] .gauge-track { stroke: var(--bar-bg); }
+[data-skin="modern"] .gauge-ring {
+  stroke: url(#gauge-gradient);
+  stroke-linecap: round;
+  transition: stroke-dashoffset 0.35s ease;
+}
+[data-skin="modern"] .gauge-content {
+  position: absolute;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  line-height: 1;
+}
+[data-skin="modern"] .gauge-content strong { font-size: 1.45rem; letter-spacing: -0.06em; }
+[data-skin="modern"] .gauge-content span { margin-top: 0.3rem; color: var(--muted); font-size: 0.7rem; font-weight: 700; letter-spacing: 0.08em; }
+[data-skin="modern"] .terminal-meter { display: none; }
+[data-skin="modern"] .bar-wrap { height: 0.6rem; border-radius: 999px; overflow: hidden; }
+[data-skin="modern"] .bar { border-radius: inherit; }
+[data-skin="modern"] .bar-text { left: 0; top: -1.15rem; line-height: 1; font-size: 0.72rem; color: var(--muted); }
+[data-skin="modern"] .section-title { font-weight: 700; letter-spacing: 0.07em; border-bottom: 0; }
+[data-skin="modern"] .container-row { padding: 0.85rem 0; }
+[data-skin="modern"] .disk-usage {
+  display: inline-flex;
+  margin-top: 0.55rem;
+  padding: 0.2rem 0.45rem;
+  border-radius: 999px;
+  background: var(--bar-bg);
+  color: var(--text);
+  font-size: 0.72rem;
+  font-weight: 700;
+}
+[data-skin="modern"] .log-button { border-radius: 0.4rem; }
+[data-skin="modern"] .updated { margin-top: 1.5rem; }
+@media (max-width: 700px) {
+  [data-skin="modern"] body { padding: 1rem; }
+  [data-skin="modern"] .header { align-items: flex-start; gap: 1rem; }
+  [data-skin="modern"] .controls { flex-wrap: wrap; justify-content: flex-end; gap: 0.4rem; }
+}
 </style>
 <script>
 function setTheme(theme) {
@@ -100,12 +230,24 @@ function setTheme(theme) {
   const btn = document.getElementById('theme-btn');
   if(btn) btn.textContent = theme === 'light' ? 'Dark Mode' : 'Light Mode';
 }
+function setSkin(skin) {
+  document.documentElement.setAttribute('data-skin', skin);
+  localStorage.setItem('skin', skin);
+  const btn = document.getElementById('skin-btn');
+  if(btn) btn.textContent = skin === 'terminal' ? 'Modern View' : 'Terminal View';
+}
 function toggleTheme() {
   const cur = document.documentElement.getAttribute('data-theme');
   setTheme(cur === 'light' ? 'dark' : 'light');
 }
+function toggleSkin() {
+  const cur = document.documentElement.getAttribute('data-skin');
+  setSkin(cur === 'terminal' ? 'modern' : 'terminal');
+}
 const savedTheme = localStorage.getItem('theme') || (window.matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark');
+const savedSkin = localStorage.getItem('skin') || 'terminal';
 setTheme(savedTheme);
+setSkin(savedSkin);
 </script>
 </head>
 <body>
@@ -116,6 +258,7 @@ setTheme(savedTheme);
     <div class="header-title">vpsmon <span id="hostname" style="font-size: 0.85rem; font-weight: normal; color: var(--muted);">--</span></div>
   </div>
   <div class="controls">
+    <button class="theme-switch skin-switch" id="skin-btn" onclick="toggleSkin()">Modern View</button>
     <button class="theme-switch" id="theme-btn" onclick="toggleTheme()">Dark Mode</button>
     <a href="/logout">Logout</a>
   </div>
@@ -125,9 +268,13 @@ setTheme(savedTheme);
   <!-- CPU Card -->
   <div class="card">
     <div class="card-title">CPU (<span id="cpu-cores">--</span> Cores)</div>
+    <div class="modern-gauge" id="cpu-gauge" aria-label="CPU usage">
+      <svg viewBox="0 0 120 120" aria-hidden="true"><defs><linearGradient id="cpu-gauge-gradient"><stop stop-color="var(--accent-start)"/><stop offset="1" stop-color="var(--accent-end)"/></linearGradient></defs><circle class="gauge-track" cx="60" cy="60" r="49"/><circle class="gauge-ring" cx="60" cy="60" r="49" style="stroke:url(#cpu-gauge-gradient)"/></svg>
+      <div class="gauge-content"><strong id="cpu-gauge-value">--</strong><span>CPU USED</span></div>
+    </div>
     <div class="metric-row"><span>Load Average</span><span id="load-avg">--</span></div>
     
-    <div class="bar-wrap" style="margin-top:1rem;">
+    <div class="bar-wrap terminal-meter" style="margin-top:1rem;">
       <div class="bar" id="cpu-bar"></div>
       <div class="bar-text">CPU <span id="cpu-usage">--</span></div>
     </div>
@@ -141,15 +288,19 @@ setTheme(savedTheme);
   <!-- Memory Card -->
   <div class="card">
     <div class="card-title">Memory</div>
+    <div class="modern-gauge" id="mem-gauge" aria-label="Memory usage">
+      <svg viewBox="0 0 120 120" aria-hidden="true"><defs><linearGradient id="mem-gauge-gradient"><stop stop-color="var(--accent-start)"/><stop offset="1" stop-color="var(--accent-end)"/></linearGradient></defs><circle class="gauge-track" cx="60" cy="60" r="49"/><circle class="gauge-ring" cx="60" cy="60" r="49" style="stroke:url(#mem-gauge-gradient)"/></svg>
+      <div class="gauge-content"><strong id="mem-gauge-value">--</strong><span>RAM USED</span></div>
+    </div>
     <div class="metric-row"><span>Used</span><span id="mem-used">--</span></div>
     <div class="metric-row"><span>Total</span><span id="mem-total">--</span></div>
     
-    <div class="bar-wrap" style="margin-top:1rem;">
+    <div class="bar-wrap terminal-meter" style="margin-top:1rem;">
       <div class="bar" id="mem-bar"></div>
       <div class="bar-text">RAM <span id="mem-usage-pct">--</span></div>
     </div>
     
-    <div class="bar-wrap" id="swap-wrap">
+    <div class="bar-wrap terminal-meter" id="swap-wrap">
       <div class="bar" id="swap-bar"></div>
       <div class="bar-text">Swap <span id="swap-usage-pct">--</span></div>
     </div>
@@ -211,6 +362,18 @@ function fmt(bytes){
 function setBar(id,pct){
   const el=document.getElementById(id);
   if (el) el.style.width=Math.min(pct,100)+"%";
+}
+function setGauge(id, valueId, pct) {
+  const gauge = document.getElementById(id);
+  const value = document.getElementById(valueId);
+  if (!gauge || !value) return;
+  const clamped = Math.min(Math.max(pct || 0, 0), 100);
+  const radius = 49;
+  const circumference = 2 * Math.PI * radius;
+  const ring = gauge.querySelector(".gauge-ring");
+  ring.style.strokeDasharray = circumference;
+  ring.style.strokeDashoffset = circumference * (1 - clamped / 100);
+  value.textContent = clamped.toFixed(1) + "%";
 }
 function escapeHTML(value) {
   const element = document.createElement("div");
@@ -296,6 +459,7 @@ function connectSSE() {
       document.getElementById("hostname").textContent=d.hostname;
       document.getElementById("cpu-usage").textContent=d.cpu_usage.toFixed(2)+"%";
       setBar("cpu-bar",d.cpu_usage);
+      setGauge("cpu-gauge", "cpu-gauge-value", d.cpu_usage);
       document.getElementById("cpu-cores").textContent=d.cpu_count;
       document.getElementById("load-avg").textContent=d.load_avg;
       
@@ -303,6 +467,7 @@ function connectSSE() {
       document.getElementById("mem-total").textContent=fmt(d.mem_total);
       document.getElementById("mem-usage-pct").textContent=d.mem_percent.toFixed(2)+"%";
       setBar("mem-bar",d.mem_percent);
+      setGauge("mem-gauge", "mem-gauge-value", d.mem_percent);
       
       const swapWrap = document.getElementById("swap-wrap");
       if(d.swap_total>0){
@@ -372,7 +537,7 @@ function connectSSE() {
 
           const stats = document.createElement("div");
           stats.className = "disk-stats";
-          [["Total", disk.total], ["Free", disk.free]].forEach(([label, value]) => {
+          [["Total", disk.total], ["Used", disk.used], ["Free", disk.free]].forEach(([label, value]) => {
             const stat = document.createElement("div");
             stat.className = "disk-stat";
             const statLabel = document.createElement("span");
@@ -397,7 +562,10 @@ function connectSSE() {
           barText.textContent = `${disk.percent.toFixed(2)}% used`;
           barWrap.append(bar, barText);
 
-          row.append(mount, stats, barWrap);
+          const usage = document.createElement("div");
+          usage.className = "disk-usage";
+          usage.textContent = `${disk.percent.toFixed(1)}% used`;
+          row.append(mount, stats, barWrap, usage);
           diskList.appendChild(row);
         });
       }
@@ -424,6 +592,7 @@ function connectSSE() {
                 <span class="container-meta"><span class="container-meta-label">↻</span> ${c.restart_count}</span>
                 <span class="container-meta"><span class="container-meta-label">CPU</span> ${c.cpu.toFixed(2)}%</span>
                 <span class="container-meta"><span class="container-meta-label">RAM</span> ${c.mem.toFixed(2)}%</span>
+                <span class="container-meta"><span class="container-meta-label">ports</span> ${escapeHTML(c.ports || "none")}</span>
               </div>
             </div>
             <div class="container-actions"><button class="log-button" type="button" data-container-id="${c.id}" aria-expanded="${c.id === window.vpsmonOpenContainerLog.id}">${c.id === window.vpsmonOpenContainerLog.id ? "hide logs" : "logs"}</button></div>
@@ -489,6 +658,9 @@ connectSSE();
 const curTheme = document.documentElement.getAttribute('data-theme');
 const themeBtn = document.getElementById('theme-btn');
 if(themeBtn) themeBtn.textContent = curTheme === 'light' ? 'Dark Mode' : 'Light Mode';
+const curSkin = document.documentElement.getAttribute('data-skin');
+const skinBtn = document.getElementById('skin-btn');
+if(skinBtn) skinBtn.textContent = curSkin === 'terminal' ? 'Modern View' : 'Terminal View';
 </script>
 </body>
 </html>

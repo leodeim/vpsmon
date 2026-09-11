@@ -1,4 +1,4 @@
-.PHONY: build run dev clean
+.PHONY: build run dev docker-dev clean
 
 APP_NAME = vpsmon
 
@@ -17,3 +17,7 @@ dev:
 		go install github.com/air-verse/air@latest; \
 	fi
 	@air
+
+docker-dev:
+	@echo "==> Starting Docker dev server with hot-reload on http://localhost:8089..."
+	@docker compose -f docker-compose.yml -f docker-compose.dev.yml up --build
