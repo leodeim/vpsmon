@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" data-skin="{{SKIN}}">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -89,6 +89,26 @@ button {
 button:hover {
   opacity: 0.8;
 }
+.modern-intro, .modern-submit { display: none; }
+.field-label { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); }
+[data-skin="modern"] { --bg: #f5f6f8; --text: #202b38; --muted: #667587; --border: #e3e7ec; --surface: #fff; --accent-start: #138b79; --accent-end: #36bfa7; }
+[data-skin="modern"][data-theme="dark"] { --bg: #101519; --text: #e7edf0; --muted: #94a3ad; --border: #2a343b; --surface: #192126; --accent-start: #329f91; --accent-end: #70dfc5; --alert: #ff9caa; }
+[data-skin="modern"] body { font-family: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; padding: 24px; min-height: 100svh; }
+[data-skin="modern"] .card { max-width: 420px; padding: 36px; border-radius: 20px; background: var(--surface); box-shadow: 0 16px 60px rgb(0 0 0 / 0.08); }
+[data-skin="modern"] .card-title { position: static; background: transparent; padding: 0; display: flex; align-items: center; gap: 12px; font-size: 22px; letter-spacing: -0.8px; }
+[data-skin="modern"] .card-title::before { content: ""; width: 22px; height: 22px; border-radius: 5px; background: repeating-linear-gradient(0deg, var(--accent-end) 0 3px, transparent 3px 6px); }
+[data-skin="modern"] .modern-intro { display: block; margin: 32px 0 26px; }
+[data-skin="modern"] h1 { font-size: 26px; font-weight: 600; letter-spacing: -0.8px; margin-bottom: 8px; }
+[data-skin="modern"] .modern-intro p { color: var(--muted); font-size: 13px; line-height: 1.6; }
+[data-skin="modern"] .field-label { position: static; width: auto; height: auto; clip-path: none; display: block; font-size: 12px; font-weight: 500; margin-bottom: 8px; }
+[data-skin="modern"] input { border-radius: 8px; padding: 12px 14px; font-size: 14px; margin-bottom: 20px; }
+[data-skin="modern"] input::placeholder { color: var(--muted); }
+[data-skin="modern"] button { border-radius: 8px; background: var(--accent-end); color: #102d27; font-size: 14px; font-weight: 600; margin-top: 4px; min-height: 44px; }
+[data-skin="modern"] .terminal-submit { display: none; }
+[data-skin="modern"] .modern-submit { display: inline; }
+[data-skin="modern"] .error { border: 1px solid var(--alert); border-radius: 8px; text-align: left; font-size: 12px; line-height: 1.5; }
+button:focus-visible { outline: 2px solid var(--accent-end); outline-offset: 4px; }
+@media (max-width: 440px) { [data-skin="modern"] .card { padding: 26px; } }
 </style>
 <script>
 const savedTheme = localStorage.getItem('theme') || (window.matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark');
@@ -98,10 +118,13 @@ document.documentElement.setAttribute('data-theme', savedTheme);
 <body>
 <div class="card">
   <div class="card-title">vpsmon</div>
+  <div class="modern-intro"><h1>Welcome back.</h1><p>Sign in to your server dashboard.</p></div>
   <form method="post" action="/login">
-    <input type="text" name="username" placeholder="username" required autofocus>
-    <input type="password" name="password" placeholder="password" required>
-    <button type="submit">authenticate</button>
+    <label class="field-label" for="username">Username</label>
+    <input id="username" type="text" name="username" placeholder="username" autocomplete="username" required autofocus>
+    <label class="field-label" for="password">Password</label>
+    <input id="password" type="password" name="password" placeholder="password" autocomplete="current-password" required>
+    <button type="submit"><span class="terminal-submit">authenticate</span><span class="modern-submit">Sign in</span></button>
   </form>
 </div>
 </body>

@@ -47,6 +47,16 @@ MON_PORT="${MON_PORT:-8088}"
 
 read -rp "Monitor username [admin]: " MON_USER </dev/tty
 MON_USER="${MON_USER:-admin}"
+
+while true; do
+    read -rp "Dashboard skin [terminal] (terminal/modern): " MON_SKIN </dev/tty
+    MON_SKIN="${MON_SKIN:-terminal}"
+    case "${MON_SKIN}" in
+        terminal|modern) break ;;
+        *) echo "Choose terminal or modern." >/dev/tty ;;
+    esac
+done
+
 while true; do
     read -rsp "Monitor password: " MON_PASS </dev/tty
     echo "" >/dev/tty
@@ -95,6 +105,7 @@ cat > "${REMOTE_DIR}/.env" <<ENVEOF
 MONITOR_ADDR=:${MON_PORT}
 MONITOR_USER=${MON_USER}
 MONITOR_PASS_HASH=${PASS_HASH}
+MONITOR_SKIN=${MON_SKIN}
 ENVEOF
 chmod 600 "${REMOTE_DIR}/.env"
 chown "${SERVICE_USER}:${SERVICE_GROUP}" "${REMOTE_DIR}/.env"
