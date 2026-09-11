@@ -58,6 +58,7 @@ Once installed on your VPS, you can manage the monitor using these commands:
 | `MONITOR_ADDR` | `:8088` | Listen address |
 | `MONITOR_USER` | `admin` | Web UI username |
 | `MONITOR_PASS_HASH` | (hash of `changeme`) | Web UI password (bcrypt hash) |
+| `MONITOR_SKIN` | `terminal` | Dashboard skin: `terminal` or `modern`; chosen during installation |
 
 ## Docker Container Visibility
 

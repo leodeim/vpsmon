@@ -19,10 +19,14 @@ import (
 //go:embed templates/*
 var templateFiles embed.FS
 
-func StartServer(listenAddr, username, expectedPassHash string) {
+func StartServer(listenAddr, username, expectedPassHash, skin string) {
 	loginHTML, _ := templateFiles.ReadFile("templates/login.html")
 	loginErrorHTML, _ := templateFiles.ReadFile("templates/login_error.html")
 	dashboardHTML, _ := templateFiles.ReadFile("templates/dashboard.html")
+	if skin != "modern" {
+		skin = "terminal"
+	}
+	dashboardHTML = []byte(strings.Replace(string(dashboardHTML), "{{SKIN}}", skin, 1))
 
 	mux := http.NewServeMux()
 

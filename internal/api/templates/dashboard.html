@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" data-skin="{{SKIN}}">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -215,6 +215,7 @@ th, td { padding: 0.3rem 0; text-align: left; }
   font-size: 0.72rem;
   font-weight: 700;
 }
+[data-skin="modern"] .disk-row .bar-text { display: none; }
 [data-skin="modern"] .log-button { border-radius: 0.4rem; }
 [data-skin="modern"] .updated { margin-top: 1.5rem; }
 @media (max-width: 700px) {
@@ -230,24 +231,12 @@ function setTheme(theme) {
   const btn = document.getElementById('theme-btn');
   if(btn) btn.textContent = theme === 'light' ? 'Dark Mode' : 'Light Mode';
 }
-function setSkin(skin) {
-  document.documentElement.setAttribute('data-skin', skin);
-  localStorage.setItem('skin', skin);
-  const btn = document.getElementById('skin-btn');
-  if(btn) btn.textContent = skin === 'terminal' ? 'Modern View' : 'Terminal View';
-}
 function toggleTheme() {
   const cur = document.documentElement.getAttribute('data-theme');
   setTheme(cur === 'light' ? 'dark' : 'light');
 }
-function toggleSkin() {
-  const cur = document.documentElement.getAttribute('data-skin');
-  setSkin(cur === 'terminal' ? 'modern' : 'terminal');
-}
 const savedTheme = localStorage.getItem('theme') || (window.matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark');
-const savedSkin = localStorage.getItem('skin') || 'terminal';
 setTheme(savedTheme);
-setSkin(savedSkin);
 </script>
 </head>
 <body>
@@ -258,7 +247,6 @@ setSkin(savedSkin);
     <div class="header-title">vpsmon <span id="hostname" style="font-size: 0.85rem; font-weight: normal; color: var(--muted);">--</span></div>
   </div>
   <div class="controls">
-    <button class="theme-switch skin-switch" id="skin-btn" onclick="toggleSkin()">Modern View</button>
     <button class="theme-switch" id="theme-btn" onclick="toggleTheme()">Dark Mode</button>
     <a href="/logout">Logout</a>
   </div>
@@ -658,9 +646,6 @@ connectSSE();
 const curTheme = document.documentElement.getAttribute('data-theme');
 const themeBtn = document.getElementById('theme-btn');
 if(themeBtn) themeBtn.textContent = curTheme === 'light' ? 'Dark Mode' : 'Light Mode';
-const curSkin = document.documentElement.getAttribute('data-skin');
-const skinBtn = document.getElementById('skin-btn');
-if(skinBtn) skinBtn.textContent = curSkin === 'terminal' ? 'Modern View' : 'Terminal View';
 </script>
 </body>
 </html>
