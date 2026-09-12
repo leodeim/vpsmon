@@ -1,73 +1,74 @@
-name: Build and Release
+name: Release
 
 on:
   push:
+    branches:
+      - "main"
     tags:
-      - 'v*' # Triggers when you push a tag like v1.0.0
+      - "v*"
+
+permissions:
+  contents: write
+
+# Serialize releases so simultaneous pushes cannot choose the same patch version.
+concurrency:
+  group: release
 
 jobs:
-  build:
-    name: Build Binaries
+  release:
+    name: Build and publish release
     runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        include:
-          - goarch: amd64
-            goos: linux
-          - goarch: arm64
-            goos: linux
-          - goarch: amd64
-            goos: darwin
-          - goarch: arm64
-            goos: darwin
-
     steps:
-      - uses: actions/checkout@v4
+      - name: Check out source
+        uses: actions/checkout@v6
+        with:
+          # Full history is required to calculate the next release tag.
+          fetch-depth: 0
+
+      - name: Determine release tag
+        shell: bash
+        run: |
+          if [[ "$GITHUB_REF" == refs/tags/* ]]; then
+            echo "RELEASE_TAG=${GITHUB_REF_NAME}" >> "$GITHUB_ENV"
+          else
+            latest=$(git tag --list 'v*' --sort=-v:refname | head -n1)
+            latest=${latest:-v0.0.0}
+            IFS=. read -r major minor patch <<<"${latest#v}"
+            echo "RELEASE_TAG=v${major}.${minor}.$((patch + 1))" >> "$GITHUB_ENV"
+          fi
 
       - name: Set up Go
-        uses: actions/setup-go@v5
+        uses: actions/setup-go@v6
         with:
-          go-version: '1.21'
+          go-version-file: go.mod
 
-      - name: Download dependencies
-        run: go mod download
+      - name: Run tests
+        run: go test ./...
 
-      - name: Build Binary
+      - name: Build release binaries
         env:
-          GOOS: ${{ matrix.goos }}
-          GOARCH: ${{ matrix.goarch }}
+          CGO_ENABLED: "0"
         run: |
-          CGO_ENABLED=0 go build -ldflags="-s -w" -o vpsmon-${{ matrix.goos }}-${{ matrix.goarch }} ./cmd/vpsmon
+          mkdir -p dist
+          for target in darwin/amd64 darwin/arm64 linux/amd64 linux/arm64; do
+            os=${target%/*}
+            arch=${target#*/}
+            GOOS="$os" GOARCH="$arch" go build -trimpath -ldflags="-s -w" -o "dist/vpsmon-${os}-${arch}" ./cmd/vpsmon
+          done
 
-      - name: Upload Artifact
-        uses: actions/upload-artifact@v4
-        with:
-          name: vpsmon-${{ matrix.goos }}-${{ matrix.goarch }}
-          path: vpsmon-${{ matrix.goos }}-${{ matrix.goarch }}
+      - name: Create checksums
+        working-directory: dist
+        run: sha256sum vpsmon-* > checksums.txt
 
-  release:
-    name: Create GitHub Release
-    needs: build
-    runs-on: ubuntu-latest
-    permissions:
-      contents: write
-    steps:
-      - uses: actions/checkout@v4
-      
-      - name: Download all artifacts
-        uses: actions/download-artifact@v4
-        with:
-          path: artifacts
-
-      - name: Prepare Release Assets
-        run: |
-          mkdir -p release-assets
-          # Move all downloaded artifacts into a flat directory
-          find artifacts -type f -exec mv {} release-assets/ \;
-
-      - name: Create Release
-        uses: softprops/action-gh-release@v1
-        with:
-          files: release-assets/*
+      - name: Publish release assets
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          if gh release view "${RELEASE_TAG}" >/dev/null 2>&1; then
+            gh release upload "${RELEASE_TAG}" dist/* --clobber
+          else
+            # Creating the release also creates its tag at this commit.
+            gh release create "${RELEASE_TAG}" dist/* \
+              --target "$GITHUB_SHA" \
+              --generate-notes \
+              --title "VPSmon ${RELEASE_TAG}"
