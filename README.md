@@ -20,25 +20,23 @@
 - **Built-in Security:** Password-protected Web UI (bcrypt) with login rate-limiting, optionally disabled for trusted networks or authenticating proxies
 - **Ultra Lightweight:** Single Go binary with zero dependencies and ~5MB RAM footprint
 
-<p align="center">
-  <img src="misc/screenshot.png" width="800" alt="vpsmon Screenshot">
-</p>
-
 ## Installation
 
 ```bash
 curl -sL https://raw.githubusercontent.com/leodeim/vpsmon/main/scripts/install.sh | sudo bash
 ```
 
-## Docker Development
+## Themes
 
-Start a live-reloading development container with:
+### Terminal
+<p align="center">
+  <img src="misc/screenshot.png" width="600" alt="vpsmon Screenshot">
+</p>
 
-```bash
-make docker-dev
-```
-
-Open [http://localhost:8089](http://localhost:8089) and sign in with `admin` / `changeme` unless you set `MONITOR_PASS_HASH`. Changes to Go files and the embedded HTML templates rebuild and restart the container automatically. The development stack also includes three demo containers (web, cache, and API) so the Docker card has real data, plus two internal demo listener ports for the socket card.
+### Modern
+<p align="center">
+  <img src="misc/screenshot-modern.png" width="600" alt="vpsmon Screenshot">
+</p>
 
 ## Useful Commands
 

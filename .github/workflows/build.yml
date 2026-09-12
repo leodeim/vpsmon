@@ -72,3 +72,4 @@ jobs:
               --target "$GITHUB_SHA" \
               --generate-notes \
               --title "VPSmon ${RELEASE_TAG}"
+          fi
