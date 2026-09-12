@@ -49,6 +49,7 @@ a:hover { text-decoration: underline; }
 .controls a { font-size: 0.85rem; }
 .theme-switch { background: none; border: none; color: var(--link); cursor: pointer; font-family: inherit; font-size: 0.85rem; padding: 0; }
 .theme-switch:hover { text-decoration: underline; }
+.theme-icon { display: none; }
 .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 1.5rem; }
 .card { border: 1px solid var(--border); padding: 1.5rem 1rem 1rem; position: relative; background: transparent; display: flex; flex-direction: column; }
 .card-title { position: absolute; top: -0.75rem; left: 0.5rem; background: var(--bg); padding: 0 0.5rem; font-weight: bold; font-size: 0.95rem; }
@@ -237,6 +238,12 @@ th, td { padding: 0.3rem 0; text-align: left; }
 [data-skin="modern"] .brand-mark { display: block; width: 22px; height: 22px; }
 [data-skin="modern"] #hostname { border-left: 1px solid var(--border); padding-left: 12px; letter-spacing: 0; }
 [data-skin="modern"] .controls a, [data-skin="modern"] .theme-switch { background: var(--surface); padding: 9px 12px; border-radius: 8px; }
+[data-skin="modern"] .theme-switch { display: grid; width: 36px; height: 36px; padding: 0; place-items: center; }
+[data-skin="modern"] .theme-switch:hover { background: var(--bar-bg); }
+[data-skin="modern"] .theme-label { display: none; }
+[data-skin="modern"] .theme-icon { width: 17px; height: 17px; }
+[data-skin="modern"][data-theme="light"] .theme-icon-moon,
+[data-skin="modern"][data-theme="dark"] .theme-icon-sun { display: block; }
 [data-skin="modern"] .overview { display: flex; align-items: end; justify-content: space-between; gap: 16px; margin-bottom: 24px; }
 [data-skin="modern"] .overview h1 { font-size: 30px; font-weight: 600; letter-spacing: -1px; margin-bottom: 7px; }
 [data-skin="modern"] .live-label { color: var(--link); background: var(--surface); border: 1px solid var(--border); padding: 7px 10px; border-radius: 20px; font-size: 11px; white-space: nowrap; }
@@ -279,6 +286,35 @@ button:focus-visible, a:focus-visible { outline: 2px solid var(--link); outline-
   [data-skin="modern"] .overview { align-items: start; }
   [data-skin="modern"] .overview h1 { font-size: 26px; }
 }
+/* Keep supporting metrics compact beside the resource gauges. */
+[data-skin="modern"] .grid { align-items: start; }
+[data-skin="modern"] #disks-card { grid-column: 1 / -1; }
+[data-skin="modern"] #disk-list { max-height: 360px; padding-right: 4px; }
+[data-skin="modern"] .disk-row { display: grid; grid-template-columns: minmax(120px, 1fr) minmax(240px, 1.5fr) 100px; align-items: center; gap: 10px 24px; padding: 16px 0; border-bottom-style: solid; }
+[data-skin="modern"] .disk-mount { font-size: 13px; }
+[data-skin="modern"] .disk-stats { grid-column: 2; grid-row: 1; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 18px; margin: 0; }
+[data-skin="modern"] .disk-stat { flex-direction: column; gap: 3px; }
+[data-skin="modern"] .disk-row .bar-wrap { grid-column: 1 / 3; grid-row: 2; height: 6px !important; }
+[data-skin="modern"] .disk-usage { grid-column: 3; grid-row: 1 / 3; justify-self: end; margin: 0; padding: 0; font-size: 12px; white-space: nowrap; }
+@media (min-width: 1001px) {
+  [data-skin="modern"] .grid { grid-template-rows: auto auto; }
+  [data-skin="modern"] #cpu-card,
+  [data-skin="modern"] #memory-card,
+  [data-skin="modern"] #network-card { align-self: stretch; }
+  [data-skin="modern"] #cpu-card { grid-column: 1; grid-row: 1; }
+  [data-skin="modern"] #memory-card { grid-column: 2; grid-row: 1; }
+  [data-skin="modern"] #network-card { grid-column: 3; grid-row: 1; }
+}
+[data-skin="modern"] #network-card #sockets-card { border: 0; border-top: 1px solid var(--border); border-radius: 0; box-shadow: none; margin-top: 14px; padding: 18px 0 0; }
+[data-skin="modern"] #network-card #listener-list { max-height: 160px; overflow-y: auto; }
+[data-skin="modern"] #cpu-card .resource-stats,
+[data-skin="modern"] #memory-card .resource-stats { height: 55px; flex: 0 0 55px; }
+@media (max-width: 640px) {
+  [data-skin="modern"] .disk-row { grid-template-columns: minmax(0, 1fr) auto; gap: 12px; }
+  [data-skin="modern"] .disk-stats { grid-column: 1 / -1; grid-row: 2; }
+  [data-skin="modern"] .disk-row .bar-wrap { grid-column: 1 / -1; grid-row: 3; }
+  [data-skin="modern"] .disk-usage { grid-column: 2; grid-row: 1; }
+}
 @media (prefers-reduced-motion: reduce) { .bar, [data-skin="modern"] .gauge-ring { transition: none; } }
 </style>
 <script>
@@ -286,7 +322,13 @@ function setTheme(theme) {
   document.documentElement.setAttribute('data-theme', theme);
   localStorage.setItem('theme', theme);
   const btn = document.getElementById('theme-btn');
-  if(btn) btn.textContent = theme === 'light' ? 'Dark Mode' : 'Light Mode';
+  if(btn) {
+    const action = theme === 'light' ? 'Dark Mode' : 'Light Mode';
+    const label = btn.querySelector('.theme-label');
+    if(label) label.textContent = action;
+    btn.setAttribute('aria-label', `Switch to ${action.toLowerCase()}`);
+    btn.title = `Switch to ${action.toLowerCase()}`;
+  }
 }
 function toggleTheme() {
   const cur = document.documentElement.getAttribute('data-theme');
@@ -304,7 +346,11 @@ setTheme(savedTheme);
     <div class="header-title"><img class="brand-mark" src="/favicon.ico" alt="">vpsmon <span id="hostname" style="font-size: 0.85rem; font-weight: normal; color: var(--muted);">--</span></div>
   </div>
   <div class="controls">
-    <button class="theme-switch" id="theme-btn" onclick="toggleTheme()">Dark Mode</button>
+    <button class="theme-switch" id="theme-btn" type="button" onclick="toggleTheme()" aria-label="Switch color mode">
+      <span class="theme-label">Dark Mode</span>
+      <svg class="theme-icon theme-icon-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20.4 15.2A8.5 8.5 0 0 1 8.8 3.6 8.5 8.5 0 1 0 20.4 15.2Z"/></svg>
+      <svg class="theme-icon theme-icon-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="3.5"/><path d="M12 2v2M12 20v2M4.93 4.93l1.42 1.42M17.65 17.65l1.42 1.42M2 12h2M20 12h2M4.93 19.07l1.42-1.42M17.65 6.35l1.42-1.42"/></svg>
+    </button>
     <a href="/logout">Logout</a>
   </div>
 </div>
@@ -312,13 +358,15 @@ setTheme(savedTheme);
 <div class="overview"><span class="live-label" id="live-label">Connecting</span></div>
 <div class="grid">
   <!-- CPU Card -->
-  <div class="card">
+  <div class="card" id="cpu-card">
     <div class="card-title">CPU (<span id="cpu-cores">--</span> Cores)</div>
     <div class="modern-gauge" id="cpu-gauge" aria-label="CPU usage">
       <svg viewBox="0 0 120 120" aria-hidden="true"><defs><linearGradient id="cpu-gauge-gradient"><stop stop-color="var(--accent-start)"/><stop offset="1" stop-color="var(--accent-end)"/></linearGradient></defs><circle class="gauge-track" cx="60" cy="60" r="49"/><circle class="gauge-ring" cx="60" cy="60" r="49" style="stroke:url(#cpu-gauge-gradient)"/></svg>
       <div class="gauge-content"><strong id="cpu-gauge-value">--</strong><span>CPU USED</span></div>
     </div>
-    <div class="metric-row"><span>Load Average</span><span id="load-avg">--</span></div>
+    <div class="resource-stats">
+      <div class="metric-row"><span>Load Average</span><span id="load-avg">--</span></div>
+    </div>
     
     <div class="bar-wrap terminal-meter" style="margin-top:1rem;">
       <div class="bar" id="cpu-bar"></div>
@@ -332,14 +380,16 @@ setTheme(savedTheme);
   </div>
 
   <!-- Memory Card -->
-  <div class="card">
+  <div class="card" id="memory-card">
     <div class="card-title">Memory</div>
     <div class="modern-gauge" id="mem-gauge" aria-label="Memory usage">
       <svg viewBox="0 0 120 120" aria-hidden="true"><defs><linearGradient id="mem-gauge-gradient"><stop stop-color="var(--accent-start)"/><stop offset="1" stop-color="var(--accent-end)"/></linearGradient></defs><circle class="gauge-track" cx="60" cy="60" r="49"/><circle class="gauge-ring" cx="60" cy="60" r="49" style="stroke:url(#mem-gauge-gradient)"/></svg>
       <div class="gauge-content"><strong id="mem-gauge-value">--</strong><span>RAM USED</span></div>
     </div>
-    <div class="metric-row"><span>Used</span><span id="mem-used">--</span></div>
-    <div class="metric-row"><span>Total</span><span id="mem-total">--</span></div>
+    <div class="resource-stats">
+      <div class="metric-row"><span>Used</span><span id="mem-used">--</span></div>
+      <div class="metric-row"><span>Total</span><span id="mem-total">--</span></div>
+    </div>
     
     <div class="bar-wrap terminal-meter" style="margin-top:1rem;">
       <div class="bar" id="mem-bar"></div>
@@ -358,7 +408,7 @@ setTheme(savedTheme);
   </div>
 
   <!-- Network & System Card -->
-  <div class="card">
+  <div class="card" id="network-card">
     <div class="card-title">Network & System</div>
     <div class="metric-row"><span>Uptime</span><span id="uptime">--</span></div>
     <div class="metric-row"><span>Processes</span><span id="procs">--</span></div>
@@ -371,13 +421,13 @@ setTheme(savedTheme);
   </div>
 
   <!-- Listening Sockets Card -->
-  <div class="card">
+  <div class="card" id="sockets-card">
     <div class="card-title">Listening Sockets (<span id="listener-count">0</span>)</div>
     <div class="card-scroll" id="listener-list"></div>
   </div>
 
   <!-- Disks Card -->
-  <div class="card">
+  <div class="card" id="disks-card">
     <div class="card-title">Disks</div>
     <div class="card-scroll" id="disk-list"></div>
   </div>
@@ -399,6 +449,10 @@ setTheme(savedTheme);
 <div class="updated">Last updated: <span id="updated">--</span></div>
 
 <script>
+// Share the live socket renderer while grouping related information in modern.
+if (document.documentElement.dataset.skin === "modern") {
+  document.getElementById("network-card").appendChild(document.getElementById("sockets-card"));
+}
 function fmt(bytes){
   if(bytes===0)return"0 B";
   const k=1024,s=["B","KB","MB","GB","TB"];
@@ -677,10 +731,9 @@ function connectSSE() {
       
       const style = getComputedStyle(document.documentElement);
       const chartColor = style.getPropertyValue('--accent-end').trim() || 'blue';
-      const textColor = style.getPropertyValue('--text').trim() || 'black';
       
-      drawSparkline("cpu-chart", history.map(m => m.cpu_usage), textColor);
-      drawSparkline("mem-chart", history.map(m => m.mem_percent), textColor);
+      drawSparkline("cpu-chart", history.map(m => m.cpu_usage), chartColor);
+      drawSparkline("mem-chart", history.map(m => m.mem_percent), chartColor);
       drawSparkline("net-chart", history.map(m => m.net_rx_speed), chartColor);
       
     } catch(e) {
@@ -704,8 +757,7 @@ function connectSSE() {
 connectSSE();
 
 const curTheme = document.documentElement.getAttribute('data-theme');
-const themeBtn = document.getElementById('theme-btn');
-if(themeBtn) themeBtn.textContent = curTheme === 'light' ? 'Dark Mode' : 'Light Mode';
+setTheme(curTheme);
 </script>
 </body>
 </html>

@@ -45,17 +45,52 @@ echo "── Configuration ─────────────────�
 read -rp "Monitor port [8088]: " MON_PORT </dev/tty
 MON_PORT="${MON_PORT:-8088}"
 
+choose_skin() {
+    local selected=0 key arrow
+
+    render_skin_picker() {
+        printf '\033[2KDashboard skin\n' >/dev/tty
+        printf '\033[2K  Use Up/Down arrows, then press Enter.\n' >/dev/tty
+        if [ "$selected" -eq 0 ]; then
+            printf '\033[2K  > Terminal — compact TUI-inspired view\n' >/dev/tty
+            printf '\033[2K    Modern   — visual dashboard view\n' >/dev/tty
+        else
+            printf '\033[2K    Terminal — compact TUI-inspired view\n' >/dev/tty
+            printf '\033[2K  > Modern   — visual dashboard view\n' >/dev/tty
+        fi
+    }
+
+    render_skin_picker
+    while true; do
+        IFS= read -rsn1 key </dev/tty
+        case "$key" in
+            '')
+                if [ "$selected" -eq 0 ]; then
+                    MON_SKIN="terminal"
+                else
+                    MON_SKIN="modern"
+                fi
+                printf '\n' >/dev/tty
+                return
+                ;;
+            $'\e')
+                IFS= read -rsn2 arrow </dev/tty || true
+                case "$arrow" in
+                    '[A'|'[B') selected=$((1 - selected)) ;;
+                esac
+                ;;
+            k|K) selected=0 ;;
+            j|J) selected=1 ;;
+        esac
+        printf '\033[4A' >/dev/tty
+        render_skin_picker
+    done
+}
+
+choose_skin
+
 read -rp "Monitor username [admin]: " MON_USER </dev/tty
 MON_USER="${MON_USER:-admin}"
-
-while true; do
-    read -rp "Dashboard skin [terminal] (terminal/modern): " MON_SKIN </dev/tty
-    MON_SKIN="${MON_SKIN:-terminal}"
-    case "${MON_SKIN}" in
-        terminal|modern) break ;;
-        *) echo "Choose terminal or modern." >/dev/tty ;;
-    esac
-done
 
 while true; do
     read -rsp "Monitor password: " MON_PASS </dev/tty
