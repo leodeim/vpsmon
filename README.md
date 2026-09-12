@@ -61,12 +61,6 @@ Once installed on your VPS, you can manage the monitor using these commands:
 | `MONITOR_SKIN` | `terminal` | Dashboard skin: `terminal` or `modern`; chosen during installation |
 | `MONITOR_NO_AUTH` | `false` | Set to `true`, `yes`, `on`, or `1` to disable the login screen and session checks |
 
-The installer asks whether to disable authentication. When enabled, it skips the username and password prompts. Only use this mode when the dashboard port is protected by a private network or an authenticating reverse proxy, because anyone who can reach vpsmon can also view metrics and container logs.
-
-## Docker Container Visibility
-
-The Docker deployment mounts `/var/run/docker.sock` so vpsmon can inspect containers and read their last 100 log lines on demand. Docker socket access is effectively privileged even when mounted read-only, so deploy it only on hosts you trust and keep it behind authentication or equivalent network protection.
-
 ## Reverse Proxy (HTTPS)
 
 [Caddy](https://caddyserver.com/) is the easiest way to expose `vpsmon` with automatic HTTPS. Add the following to your `Caddyfile`:
