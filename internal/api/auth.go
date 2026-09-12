@@ -99,7 +99,20 @@ func (s *sessionStore) destroy(token string) {
 	s.mu.Unlock()
 }
 
+// authDisabled makes every request count as authenticated. Set via
+// SetAuthDisabled when the dashboard is only reachable on a trusted
+// network (e.g. a VPN or Tailscale interface).
+var authDisabled bool
+
+// SetAuthDisabled turns the login requirement on or off.
+func SetAuthDisabled(disabled bool) {
+	authDisabled = disabled
+}
+
 func authenticated(r *http.Request) bool {
+	if authDisabled {
+		return true
+	}
 	c, err := r.Cookie("session")
 	if err != nil {
 		return false

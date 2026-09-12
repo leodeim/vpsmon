@@ -57,6 +57,10 @@ func StartServer(listenAddr, username, expectedPassHash, skin string) {
 	})
 
 	mux.HandleFunc("/login", func(w http.ResponseWriter, r *http.Request) {
+		if authDisabled {
+			http.Redirect(w, r, "/", http.StatusFound)
+			return
+		}
 		if r.Method == http.MethodGet {
 			w.Header().Set("Content-Type", "text/html; charset=utf-8")
 			w.Write(loginHTML)
@@ -108,6 +112,10 @@ func StartServer(listenAddr, username, expectedPassHash, skin string) {
 			Path:   "/",
 			MaxAge: -1,
 		})
+		if authDisabled {
+			http.Redirect(w, r, "/", http.StatusFound)
+			return
+		}
 		http.Redirect(w, r, "/login", http.StatusFound)
 	})
 
