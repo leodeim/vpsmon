@@ -1,0 +1,32 @@
+services:
+  vpsmon:
+    build:
+      context: .
+      target: development
+    restart: "no"
+    command: ["/bin/sh", "-c", "nc -lk -p 9100 >/dev/null & nc -lk -p 9200 >/dev/null & exec /go/bin/air -c .air.toml"]
+    volumes:
+      # Air watches this mount and restarts vpsmon after source/template edits.
+      - .:/app
+      - go-mod-cache:/go/pkg/mod
+
+  demo-web:
+    image: nginx:1.27-alpine
+    container_name: vpsmon-demo-web
+    ports:
+      - "8081:80"
+
+  demo-cache:
+    image: redis:7-alpine
+    container_name: vpsmon-demo-cache
+    ports:
+      - "6380:6379"
+
+  demo-api:
+    image: traefik/whoami:v1.10
+    container_name: vpsmon-demo-api
+    ports:
+      - "8082:80"
+
+volumes:
+  go-mod-cache:

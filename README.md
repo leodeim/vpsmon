@@ -30,6 +30,16 @@
 curl -sL https://raw.githubusercontent.com/leodeim/vpsmon/main/scripts/install.sh | sudo bash
 ```
 
+## Docker Development
+
+Start a live-reloading development container with:
+
+```bash
+make docker-dev
+```
+
+Open [http://localhost:8089](http://localhost:8089) and sign in with `admin` / `changeme` unless you set `MONITOR_PASS_HASH`. Changes to Go files and the embedded HTML templates rebuild and restart the container automatically. The development stack also includes three demo containers (web, cache, and API) so the Docker card has real data, plus two internal demo listener ports for the socket card.
+
 ## Useful Commands
 
 Once installed on your VPS, you can manage the monitor using these commands:
@@ -49,6 +59,7 @@ Once installed on your VPS, you can manage the monitor using these commands:
 | `MONITOR_USER` | `admin` | Web UI username |
 | `MONITOR_PASS_HASH` | (hash of `changeme`) | Web UI password (bcrypt hash) |
 | `MONITOR_NO_AUTH` | (unset) | Set to `true` to disable the login entirely. Only for dashboards bound to a trusted interface (e.g. a Tailscale/WireGuard IP), never on a public address. |
+| `MONITOR_SKIN` | `terminal` | Dashboard skin: `terminal` or `modern`; chosen during installation |
 
 ## Docker Container Visibility
 

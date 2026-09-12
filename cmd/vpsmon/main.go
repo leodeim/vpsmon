@@ -35,6 +35,7 @@ func main() {
 
 	listenAddr := envOr("MONITOR_ADDR", ":8088")
 	username := envOr("MONITOR_USER", "admin")
+	skin := envOr("MONITOR_SKIN", "terminal")
 
 	defaultHash, _ := bcrypt.GenerateFromPassword([]byte("changeme"), bcrypt.DefaultCost)
 	expectedPassHash := envOr("MONITOR_PASS_HASH", string(defaultHash))
@@ -45,5 +46,5 @@ func main() {
 	}
 
 	metrics.StartCollector()
-	api.StartServer(listenAddr, username, expectedPassHash)
+	api.StartServer(listenAddr, username, expectedPassHash, skin)
 }

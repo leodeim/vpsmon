@@ -1,5 +1,3 @@
-version: '3.8'
-
 services:
   vpsmon:
     build: .
@@ -12,7 +10,9 @@ services:
       - "8089:8088"
     environment:
       # Pass your pre-generated hash here or in a .env file next to this docker-compose.yml
-      - MONITOR_PASS_HASH=${MONITOR_PASS_HASH}
+      - MONITOR_PASS_HASH=${MONITOR_PASS_HASH:-}
+      # Choose terminal (default) or modern; this is fixed for all dashboard visitors.
+      - MONITOR_SKIN=${MONITOR_SKIN:-terminal}
     volumes:
       # Required for Docker container metadata, stats, and on-demand logs.
       - /var/run/docker.sock:/var/run/docker.sock:ro
