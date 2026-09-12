@@ -11,7 +11,7 @@ import (
 	"time"
 
 	"golang.org/x/crypto/bcrypt"
-	
+
 	"vpsmon/internal/metrics"
 	"vpsmon/misc"
 )
@@ -19,7 +19,7 @@ import (
 //go:embed templates/*
 var templateFiles embed.FS
 
-func StartServer(listenAddr, username, expectedPassHash, skin string) {
+func StartServer(listenAddr, username, expectedPassHash, skin string, noAuth bool) {
 	loginHTML, _ := templateFiles.ReadFile("templates/login.html")
 	loginErrorHTML, _ := templateFiles.ReadFile("templates/login_error.html")
 	dashboardHTML, _ := templateFiles.ReadFile("templates/dashboard.html")
@@ -27,17 +27,25 @@ func StartServer(listenAddr, username, expectedPassHash, skin string) {
 		skin = "terminal"
 	}
 	dashboardHTML = []byte(strings.Replace(string(dashboardHTML), "{{SKIN}}", skin, 1))
+	logoutControl := `<a class="logout-link" href="/logout">Logout</a>`
+	if noAuth {
+		logoutControl = ""
+	}
+	dashboardHTML = []byte(strings.Replace(string(dashboardHTML), "{{LOGOUT_CONTROL}}", logoutControl, 1))
 	loginHTML = []byte(strings.Replace(string(loginHTML), "{{SKIN}}", skin, 1))
 	loginErrorHTML = []byte(strings.Replace(string(loginErrorHTML), "{{SKIN}}", skin, 1))
 
 	mux := http.NewServeMux()
+	isAuthorized := func(r *http.Request) bool {
+		return noAuth || authenticated(r)
+	}
 
 	mux.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
 		if r.URL.Path != "/" {
 			http.NotFound(w, r)
 			return
 		}
-		if !authenticated(r) {
+		if !isAuthorized(r) {
 			http.Redirect(w, r, "/login", http.StatusFound)
 			return
 		}
@@ -57,7 +65,7 @@ func StartServer(listenAddr, username, expectedPassHash, skin string) {
 	})
 
 	mux.HandleFunc("/login", func(w http.ResponseWriter, r *http.Request) {
-		if authDisabled {
+		if noAuth {
 			http.Redirect(w, r, "/", http.StatusFound)
 			return
 		}
@@ -103,6 +111,10 @@ func StartServer(listenAddr, username, expectedPassHash, skin string) {
 	})
 
 	mux.HandleFunc("/logout", func(w http.ResponseWriter, r *http.Request) {
+		if noAuth {
+			http.Redirect(w, r, "/", http.StatusFound)
+			return
+		}
 		if c, err := r.Cookie("session"); err == nil {
 			sessions.destroy(c.Value)
 		}
@@ -112,19 +124,15 @@ func StartServer(listenAddr, username, expectedPassHash, skin string) {
 			Path:   "/",
 			MaxAge: -1,
 		})
-		if authDisabled {
-			http.Redirect(w, r, "/", http.StatusFound)
-			return
-		}
 		http.Redirect(w, r, "/login", http.StatusFound)
 	})
 
 	mux.HandleFunc("/api/metrics/stream", func(w http.ResponseWriter, r *http.Request) {
-		if !authenticated(r) {
+		if !isAuthorized(r) {
 			http.Error(w, "unauthorized", http.StatusUnauthorized)
 			return
 		}
-		
+
 		flusher, ok := w.(http.Flusher)
 		if !ok {
 			http.Error(w, "Streaming unsupported", http.StatusInternalServerError)
@@ -140,7 +148,7 @@ func StartServer(listenAddr, username, expectedPassHash, skin string) {
 			fmt.Fprintf(w, "data: %s\n\n", string(data))
 			flusher.Flush()
 		}
-		
+
 		sendMetrics() // Send initial data immediately
 
 		ticker := time.NewTicker(5 * time.Second)
@@ -151,7 +159,7 @@ func StartServer(listenAddr, username, expectedPassHash, skin string) {
 			case <-r.Context().Done():
 				return // Client disconnected
 			case <-ticker.C:
-				if !authenticated(r) {
+				if !isAuthorized(r) {
 					return // Session expired, drop connection
 				}
 				sendMetrics()
@@ -160,7 +168,7 @@ func StartServer(listenAddr, username, expectedPassHash, skin string) {
 	})
 
 	mux.HandleFunc("/api/containers/", func(w http.ResponseWriter, r *http.Request) {
-		if !authenticated(r) {
+		if !isAuthorized(r) {
 			http.Error(w, "unauthorized", http.StatusUnauthorized)
 			return
 		}
@@ -180,6 +188,9 @@ func StartServer(listenAddr, username, expectedPassHash, skin string) {
 		fmt.Fprint(w, logs)
 	})
 
+	if noAuth {
+		log.Printf("WARNING: authentication is disabled")
+	}
 	log.Printf("vpsmon starting on %s", listenAddr)
 	if err := http.ListenAndServe(listenAddr, mux); err != nil {
 		log.Fatal(err)

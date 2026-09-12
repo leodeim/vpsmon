@@ -11,6 +11,8 @@ services:
     environment:
       # Pass your pre-generated hash here or in a .env file next to this docker-compose.yml
       - MONITOR_PASS_HASH=${MONITOR_PASS_HASH:-}
+      # Set to true only when access is protected by a private network or authenticating proxy.
+      - MONITOR_NO_AUTH=${MONITOR_NO_AUTH:-false}
       # Choose terminal (default) or modern; this is fixed for all dashboard visitors.
       - MONITOR_SKIN=${MONITOR_SKIN:-terminal}
     volumes:

@@ -89,24 +89,42 @@ choose_skin() {
 
 choose_skin
 
-read -rp "Monitor username [admin]: " MON_USER </dev/tty
-MON_USER="${MON_USER:-admin}"
-
 while true; do
-    read -rsp "Monitor password: " MON_PASS </dev/tty
-    echo "" >/dev/tty
-    if [ -z "$MON_PASS" ]; then
-        echo "Password cannot be empty. Try again." >/dev/tty
-        continue
-    fi
-    read -rsp "Confirm password: " MON_PASS2 </dev/tty
-    echo "" >/dev/tty
-    if [ "$MON_PASS" != "$MON_PASS2" ]; then
-        echo "Passwords do not match. Try again." >/dev/tty
-        continue
-    fi
-    break
+    read -rp "Disable built-in authentication? [y/N]: " MON_NO_AUTH_INPUT </dev/tty
+    case "${MON_NO_AUTH_INPUT,,}" in
+        ""|n|no)
+            MON_NO_AUTH="false"
+            break
+            ;;
+        y|yes)
+            MON_NO_AUTH="true"
+            echo "WARNING: Anyone who can reach this port will have full dashboard access." >/dev/tty
+            break
+            ;;
+        *) echo "Choose yes or no." >/dev/tty ;;
+    esac
 done
+
+if [ "$MON_NO_AUTH" = "false" ]; then
+    read -rp "Monitor username [admin]: " MON_USER </dev/tty
+    MON_USER="${MON_USER:-admin}"
+
+    while true; do
+        read -rsp "Monitor password: " MON_PASS </dev/tty
+        echo "" >/dev/tty
+        if [ -z "$MON_PASS" ]; then
+            echo "Password cannot be empty. Try again." >/dev/tty
+            continue
+        fi
+        read -rsp "Confirm password: " MON_PASS2 </dev/tty
+        echo "" >/dev/tty
+        if [ "$MON_PASS" != "$MON_PASS2" ]; then
+            echo "Passwords do not match. Try again." >/dev/tty
+            continue
+        fi
+        break
+    done
+fi
 
 echo ""
 echo "==> Setting up directories and users..."
@@ -132,16 +150,20 @@ curl -sL "https://raw.githubusercontent.com/${REPO}/main/scripts/update.sh" -o "
 curl -sL "https://raw.githubusercontent.com/${REPO}/main/scripts/uninstall.sh" -o "${REMOTE_DIR}/uninstall.sh" || true
 chmod 750 "${REMOTE_DIR}/update.sh" "${REMOTE_DIR}/uninstall.sh"
 
-echo "==> Generating credentials..."
-# Run the binary to generate password hash
-PASS_HASH=$("${REMOTE_DIR}/${APP_NAME}" -hash "${MON_PASS}")
+if [ "$MON_NO_AUTH" = "false" ]; then
+    echo "==> Generating credentials..."
+    PASS_HASH=$("${REMOTE_DIR}/${APP_NAME}" -hash "${MON_PASS}")
+fi
 
-cat > "${REMOTE_DIR}/.env" <<ENVEOF
-MONITOR_ADDR=:${MON_PORT}
-MONITOR_USER=${MON_USER}
-MONITOR_PASS_HASH=${PASS_HASH}
-MONITOR_SKIN=${MON_SKIN}
-ENVEOF
+{
+    echo "MONITOR_ADDR=:${MON_PORT}"
+    echo "MONITOR_SKIN=${MON_SKIN}"
+    echo "MONITOR_NO_AUTH=${MON_NO_AUTH}"
+    if [ "$MON_NO_AUTH" = "false" ]; then
+        echo "MONITOR_USER=${MON_USER}"
+        echo "MONITOR_PASS_HASH=${PASS_HASH}"
+    fi
+} > "${REMOTE_DIR}/.env"
 chmod 600 "${REMOTE_DIR}/.env"
 chown "${SERVICE_USER}:${SERVICE_GROUP}" "${REMOTE_DIR}/.env"
 
@@ -189,7 +211,11 @@ echo "════════════════════════�
 echo "  VPSmon installed successfully!"
 echo ""
 echo "  URL:     http://<your-vps-ip>:${MON_PORT}"
-echo "  Login:   ${MON_USER}"
+if [ "$MON_NO_AUTH" = "true" ]; then
+    echo "  Login:   disabled"
+else
+    echo "  Login:   ${MON_USER}"
+fi
 echo ""
 echo "  Useful commands:"
 echo "    systemctl status ${APP_NAME}"

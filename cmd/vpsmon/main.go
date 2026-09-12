@@ -8,7 +8,7 @@ import (
 	"strings"
 
 	"golang.org/x/crypto/bcrypt"
-	
+
 	"vpsmon/internal/api"
 	"vpsmon/internal/metrics"
 )
@@ -18,6 +18,15 @@ func envOr(key, fallback string) string {
 		return v
 	}
 	return fallback
+}
+
+func envBool(key string) bool {
+	switch strings.ToLower(strings.TrimSpace(os.Getenv(key))) {
+	case "1", "true", "yes", "on":
+		return true
+	default:
+		return false
+	}
 }
 
 func main() {
@@ -34,17 +43,17 @@ func main() {
 	}
 
 	listenAddr := envOr("MONITOR_ADDR", ":8088")
-	username := envOr("MONITOR_USER", "admin")
 	skin := envOr("MONITOR_SKIN", "terminal")
+	noAuth := envBool("MONITOR_NO_AUTH")
 
-	defaultHash, _ := bcrypt.GenerateFromPassword([]byte("changeme"), bcrypt.DefaultCost)
-	expectedPassHash := envOr("MONITOR_PASS_HASH", string(defaultHash))
-
-	if v := os.Getenv("MONITOR_NO_AUTH"); v == "1" || strings.EqualFold(v, "true") {
-		log.Println("WARNING: MONITOR_NO_AUTH is set; the dashboard is reachable without a password. Only use this on a trusted network.")
-		api.SetAuthDisabled(true)
+	username := ""
+	expectedPassHash := ""
+	if !noAuth {
+		username = envOr("MONITOR_USER", "admin")
+		defaultHash, _ := bcrypt.GenerateFromPassword([]byte("changeme"), bcrypt.DefaultCost)
+		expectedPassHash = envOr("MONITOR_PASS_HASH", string(defaultHash))
 	}
 
 	metrics.StartCollector()
-	api.StartServer(listenAddr, username, expectedPassHash, skin)
+	api.StartServer(listenAddr, username, expectedPassHash, skin, noAuth)
 }

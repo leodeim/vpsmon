@@ -17,7 +17,7 @@
 - **Disk & Network:** Tracks used/free space across all mounts and live network Rx/Tx speeds
 - **Listening Sockets:** Audits TCP listeners and bound UDP sockets, highlighting services bound to all interfaces
 - **Optional GPU Monitoring:** Shows NVIDIA (`nvidia-smi`) or AMD ROCm (`amd-smi`) GPU utilization, VRAM, and temperature when available
-- **Built-in Security:** Password-protected Web UI (bcrypt) with login rate-limiting
+- **Built-in Security:** Password-protected Web UI (bcrypt) with login rate-limiting, optionally disabled for trusted networks or authenticating proxies
 - **Ultra Lightweight:** Single Go binary with zero dependencies and ~5MB RAM footprint
 
 <p align="center">
@@ -58,12 +58,14 @@ Once installed on your VPS, you can manage the monitor using these commands:
 | `MONITOR_ADDR` | `:8088` | Listen address |
 | `MONITOR_USER` | `admin` | Web UI username |
 | `MONITOR_PASS_HASH` | (hash of `changeme`) | Web UI password (bcrypt hash) |
-| `MONITOR_NO_AUTH` | (unset) | Set to `true` to disable the login entirely. Only for dashboards bound to a trusted interface (e.g. a Tailscale/WireGuard IP), never on a public address. |
 | `MONITOR_SKIN` | `terminal` | Dashboard skin: `terminal` or `modern`; chosen during installation |
+| `MONITOR_NO_AUTH` | `false` | Set to `true`, `yes`, `on`, or `1` to disable the login screen and session checks |
+
+The installer asks whether to disable authentication. When enabled, it skips the username and password prompts. Only use this mode when the dashboard port is protected by a private network or an authenticating reverse proxy, because anyone who can reach vpsmon can also view metrics and container logs.
 
 ## Docker Container Visibility
 
-The Docker deployment mounts `/var/run/docker.sock` so vpsmon can inspect containers and read their last 100 log lines on demand. Docker socket access is effectively privileged even when mounted read-only, so keep vpsmon behind its authentication and deploy it only on hosts you trust.
+The Docker deployment mounts `/var/run/docker.sock` so vpsmon can inspect containers and read their last 100 log lines on demand. Docker socket access is effectively privileged even when mounted read-only, so deploy it only on hosts you trust and keep it behind authentication or equivalent network protection.
 
 ## Reverse Proxy (HTTPS)
 
