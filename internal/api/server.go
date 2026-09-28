@@ -5,6 +5,7 @@ import (
 	"embed"
 	"encoding/json"
 	"fmt"
+	"html"
 	"log"
 	"net/http"
 	"strings"
@@ -19,21 +20,25 @@ import (
 //go:embed templates/*
 var templateFiles embed.FS
 
+// Register a skin here and add its matching stylesheet in templates/assets.
+var supportedSkins = map[string]struct{}{
+	"terminal": {},
+	"modern":   {},
+}
+
 func StartServer(listenAddr, username, expectedPassHash, skin string, noAuth bool) {
 	loginHTML, _ := templateFiles.ReadFile("templates/login.html")
-	loginErrorHTML, _ := templateFiles.ReadFile("templates/login_error.html")
 	dashboardHTML, _ := templateFiles.ReadFile("templates/dashboard.html")
-	if skin != "modern" {
+	if _, ok := supportedSkins[skin]; !ok {
 		skin = "terminal"
 	}
-	dashboardHTML = []byte(strings.Replace(string(dashboardHTML), "{{SKIN}}", skin, 1))
+	dashboardHTML = []byte(strings.ReplaceAll(string(dashboardHTML), "{{SKIN}}", skin))
 	logoutControl := `<a class="logout-link" href="/logout">Logout</a>`
 	if noAuth {
 		logoutControl = ""
 	}
 	dashboardHTML = []byte(strings.Replace(string(dashboardHTML), "{{LOGOUT_CONTROL}}", logoutControl, 1))
-	loginHTML = []byte(strings.Replace(string(loginHTML), "{{SKIN}}", skin, 1))
-	loginErrorHTML = []byte(strings.Replace(string(loginErrorHTML), "{{SKIN}}", skin, 1))
+	loginHTML = []byte(strings.ReplaceAll(string(loginHTML), "{{SKIN}}", skin))
 
 	mux := http.NewServeMux()
 	isAuthorized := func(r *http.Request) bool {
@@ -64,6 +69,42 @@ func StartServer(listenAddr, username, expectedPassHash, skin string, noAuth boo
 		w.Write(icon)
 	})
 
+	// Stylesheets are public assets so the login page can be styled before authentication.
+	mux.HandleFunc("/assets/", func(w http.ResponseWriter, r *http.Request) {
+		if r.Method != http.MethodGet && r.Method != http.MethodHead {
+			http.Error(w, "method not allowed", http.StatusMethodNotAllowed)
+			return
+		}
+
+		name := strings.TrimPrefix(r.URL.Path, "/assets/")
+		if name != "base.css" {
+			if !strings.HasSuffix(name, ".css") {
+				http.NotFound(w, r)
+				return
+			}
+			if _, ok := supportedSkins[strings.TrimSuffix(name, ".css")]; !ok {
+				http.NotFound(w, r)
+				return
+			}
+		}
+		if strings.Contains(name, "/") {
+			http.NotFound(w, r)
+			return
+		}
+
+		asset, err := templateFiles.ReadFile("templates/assets/" + name)
+		if err != nil {
+			http.NotFound(w, r)
+			return
+		}
+		w.Header().Set("Content-Type", "text/css; charset=utf-8")
+		w.Header().Set("Cache-Control", "no-cache")
+		w.Header().Set("X-Content-Type-Options", "nosniff")
+		if r.Method == http.MethodGet {
+			_, _ = w.Write(asset)
+		}
+	})
+
 	mux.HandleFunc("/login", func(w http.ResponseWriter, r *http.Request) {
 		if noAuth {
 			http.Redirect(w, r, "/", http.StatusFound)
@@ -71,7 +112,7 @@ func StartServer(listenAddr, username, expectedPassHash, skin string, noAuth boo
 		}
 		if r.Method == http.MethodGet {
 			w.Header().Set("Content-Type", "text/html; charset=utf-8")
-			w.Write(loginHTML)
+			_, _ = w.Write(renderLoginPage(loginHTML, ""))
 			return
 		}
 
@@ -79,8 +120,7 @@ func StartServer(listenAddr, username, expectedPassHash, skin string, noAuth boo
 		if !rateLimit(ip) {
 			w.Header().Set("Content-Type", "text/html; charset=utf-8")
 			w.WriteHeader(http.StatusTooManyRequests)
-			errorHTML := strings.Replace(string(loginErrorHTML), "Invalid username or password", "Too many attempts. Try again in 5 minutes.", 1)
-			fmt.Fprint(w, errorHTML)
+			_, _ = w.Write(renderLoginPage(loginHTML, "Too many attempts. Try again in 5 minutes."))
 			log.Printf("Blocked IP %s (rate limit)", ip)
 			return
 		}
@@ -106,7 +146,7 @@ func StartServer(listenAddr, username, expectedPassHash, skin string, noAuth boo
 		}
 		w.Header().Set("Content-Type", "text/html; charset=utf-8")
 		w.WriteHeader(http.StatusUnauthorized)
-		w.Write(loginErrorHTML)
+		_, _ = w.Write(renderLoginPage(loginHTML, "Invalid username or password"))
 		log.Printf("Failed login attempt from IP %s", ip)
 	})
 
@@ -195,4 +235,12 @@ func StartServer(listenAddr, username, expectedPassHash, skin string, noAuth boo
 	if err := http.ListenAndServe(listenAddr, mux); err != nil {
 		log.Fatal(err)
 	}
+}
+
+func renderLoginPage(loginHTML []byte, errorMessage string) []byte {
+	errorMarkup := ""
+	if errorMessage != "" {
+		errorMarkup = `<div class="login-error" role="alert">` + html.EscapeString(errorMessage) + `</div>`
+	}
+	return []byte(strings.Replace(string(loginHTML), "{{LOGIN_ERROR}}", errorMarkup, 1))
 }
