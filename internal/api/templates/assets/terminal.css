@@ -33,7 +33,7 @@ body { font-family: 'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, Courie
 .theme-switch { background: none; border: none; color: var(--link); cursor: pointer; font-family: inherit; font-size: 0.85rem; padding: 0; }
 .theme-switch:hover { text-decoration: underline; }
 .theme-icon { display: none; }
-.grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(320px, 100%), 1fr)); gap: 1.5rem; }
+.grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(320px, 100%), 1fr)); gap: 1.5rem; align-items: start; }
 .card { border: 1px solid var(--border); padding: 1.5rem 1rem 1rem; position: relative; background: transparent; }
 .card-title { position: absolute; top: -0.75rem; left: 0.5rem; background: var(--bg); padding: 0 0.5rem; font-weight: bold; font-size: 0.95rem; }
 .metric-row { display: flex; justify-content: space-between; margin-bottom: 0.5rem; font-size: 0.9rem; }
@@ -42,7 +42,7 @@ body { font-family: 'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, Courie
 .bar-text { position: absolute; top: 0; left: 0.5rem; line-height: 1.2rem; font-size: 0.85rem; }
 table { width: 100%; border-collapse: collapse; font-size: 0.85rem; }
 th, td { padding: 0.3rem 0; text-align: left; }
-.sparkline { width: 100%; height: 40px; margin-top: auto; padding-top: 1rem; }
+.sparkline { width: 100%; height: 36px; margin-top: 0.65rem; }
 .updated { text-align: center; color: var(--muted); font-size: 0.8rem; margin-top: 2rem; }
 .section-title { font-size: 0.8rem; color: var(--muted); text-transform: uppercase; margin: 1rem 0 0.5rem; border-bottom: 1px dashed var(--border); }
 .container-row { gap: 0.5rem 1rem; padding: 0.65rem 0.75rem; }
@@ -50,7 +50,7 @@ th, td { padding: 0.3rem 0; text-align: left; }
 .container-name { font-weight: bold; }
 .container-image { color: var(--muted); font-size: 0.8rem; }
 .container-metrics { gap: 0.2rem 0.85rem; margin-top: 0.35rem; }
-.container-meta { font-size: 0.8rem; }
+.container-meta { font-size: 0.8rem; white-space: normal; overflow-wrap: anywhere; }
 .log-button { border: 1px solid var(--border); background: transparent; color: var(--link); cursor: pointer; font-family: inherit; font-size: 0.8rem; padding: 0.35rem 0.6rem; }
 .log-button:hover { text-decoration: underline; }
 .container-log-output { padding: 0.75rem; border-top: 1px solid var(--border); background: var(--bar-bg); font-size: 0.8rem; }
@@ -59,12 +59,20 @@ th, td { padding: 0.3rem 0; text-align: left; }
 .socket-row:last-child { border-bottom: 0; }
 .socket-protocol { color: var(--muted); font-size: 0.75rem; margin-right: 0.45rem; }
 .socket-scope-wildcard { color: var(--alert); font-weight: bold; }
+#network-card #sockets-card { border: 0; border-top: 1px dashed var(--border); margin-top: 0.85rem; padding: 0.85rem 0 0; }
+#network-card #sockets-card .card-title { position: static; background: transparent; padding: 0; margin-bottom: 0.4rem; font-size: 0.8rem; color: var(--muted); text-transform: uppercase; }
+#network-card #listener-list { max-height: 8rem; }
 .disk-row { padding: 0.4rem 0 0.6rem; border-bottom: 1px dashed var(--border); }
 .disk-row:last-child { padding-bottom: 0; }
 .disk-mount { font-size: 0.85rem; font-weight: bold; }
 .disk-stats { grid-template-columns: 1fr 1fr; gap: 0.75rem; margin: 0.5rem 0; }
 .disk-stat { gap: 0.4rem; font-size: 0.8rem; }
 .modern-gauge, .disk-usage { display: none; }
+
+@media (min-width: 1056px) {
+  .grid { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+  #cpu-card, #memory-card, #network-card { align-self: stretch; }
+}
 
 .login-page { min-height: 100vh; --alert: #cc0000; }
 html[data-theme="dark"] .login-page { --accent-start: #63b7b1; --accent-end: #7599d1; --bar-fill: linear-gradient(90deg, var(--accent-start), var(--accent-end)); --alert: #ff4444; --link: #7599d1; }

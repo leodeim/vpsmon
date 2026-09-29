@@ -51,13 +51,15 @@ setTheme(savedTheme);
 <div class="grid">
   <!-- CPU Card -->
   <div class="card" id="cpu-card">
-    <div class="card-title">CPU (<span id="cpu-cores">--</span> Cores)</div>
-    <div class="modern-gauge" id="cpu-gauge" aria-label="CPU usage">
-      <svg viewBox="0 0 120 120" aria-hidden="true"><defs><linearGradient id="cpu-gauge-gradient"><stop stop-color="var(--accent-start)"/><stop offset="1" stop-color="var(--accent-end)"/></linearGradient></defs><circle class="gauge-track" cx="60" cy="60" r="49"/><circle class="gauge-ring" cx="60" cy="60" r="49" pathLength="100" stroke-dasharray="100" stroke-dashoffset="100" style="stroke:url(#cpu-gauge-gradient);visibility:hidden"/></svg>
-      <div class="gauge-content"><strong id="cpu-gauge-value">--</strong><span>CPU USED</span></div>
-    </div>
-    <div class="resource-stats">
-      <div class="metric-row"><span>Load Average</span><span id="load-avg">--</span></div>
+    <div class="card-title">CPU (<span id="cpu-cores">--</span> <span id="cpu-core-label">Cores</span>)</div>
+    <div class="resource-overview">
+      <div class="modern-gauge" id="cpu-gauge" aria-label="CPU usage">
+        <svg viewBox="0 0 120 120" aria-hidden="true"><defs><linearGradient id="cpu-gauge-gradient"><stop stop-color="var(--accent-start)"/><stop offset="1" stop-color="var(--accent-end)"/></linearGradient></defs><circle class="gauge-track" cx="60" cy="60" r="49"/><circle class="gauge-ring" cx="60" cy="60" r="49" pathLength="100" stroke-dasharray="100" stroke-dashoffset="100" style="stroke:url(#cpu-gauge-gradient);visibility:hidden"/></svg>
+        <div class="gauge-content"><strong id="cpu-gauge-value">--</strong><span>CPU USED</span></div>
+      </div>
+      <div class="resource-stats">
+        <div class="metric-row"><span>Load Average</span><span id="load-avg">--</span></div>
+      </div>
     </div>
     
     <div class="bar-wrap terminal-meter" style="margin-top:1rem;">
@@ -74,26 +76,27 @@ setTheme(savedTheme);
   <!-- Memory Card -->
   <div class="card" id="memory-card">
     <div class="card-title">Memory</div>
-    <div class="modern-gauge" id="mem-gauge" aria-label="Memory usage">
-      <svg viewBox="0 0 120 120" aria-hidden="true"><defs><linearGradient id="mem-gauge-gradient"><stop stop-color="var(--accent-start)"/><stop offset="1" stop-color="var(--accent-end)"/></linearGradient></defs><circle class="gauge-track" cx="60" cy="60" r="49"/><circle class="gauge-ring" cx="60" cy="60" r="49" pathLength="100" stroke-dasharray="100" stroke-dashoffset="100" style="stroke:url(#mem-gauge-gradient);visibility:hidden"/></svg>
-      <div class="gauge-content"><strong id="mem-gauge-value">--</strong><span>RAM USED</span></div>
-    </div>
-    <div class="resource-stats">
-      <div class="metric-row"><span>Used</span><span id="mem-used">--</span></div>
-      <div class="metric-row"><span>Total</span><span id="mem-total">--</span></div>
+    <div class="resource-overview">
+      <div class="modern-gauge" id="mem-gauge" aria-label="Memory usage">
+        <svg viewBox="0 0 120 120" aria-hidden="true"><defs><linearGradient id="mem-gauge-gradient"><stop stop-color="var(--accent-start)"/><stop offset="1" stop-color="var(--accent-end)"/></linearGradient></defs><circle class="gauge-track" cx="60" cy="60" r="49"/><circle class="gauge-ring" cx="60" cy="60" r="49" pathLength="100" stroke-dasharray="100" stroke-dashoffset="100" style="stroke:url(#mem-gauge-gradient);visibility:hidden"/></svg>
+        <div class="gauge-content"><strong id="mem-gauge-value">--</strong><span>RAM USED</span></div>
+      </div>
+      <div class="resource-stats">
+        <div class="metric-row"><span>Used</span><span id="mem-used">--</span></div>
+        <div class="metric-row"><span>Total</span><span id="mem-total">--</span></div>
+        <div class="swap-details">
+          <div class="metric-row swap-summary"><span>Swap</span><span class="swap-summary-value"><span id="swap-amount">--</span><span class="swap-summary-percent" id="swap-summary-percent"></span></span></div>
+          <div class="bar-wrap swap-meter" id="swap-wrap" style="display:none;">
+            <div class="bar" id="swap-bar"></div>
+            <div class="bar-text"><span class="swap-meter-label">Swap </span><span id="swap-usage-pct">--</span></div>
+          </div>
+        </div>
+      </div>
     </div>
     
     <div class="bar-wrap terminal-meter" style="margin-top:1rem;">
       <div class="bar" id="mem-bar"></div>
       <div class="bar-text">RAM <span id="mem-usage-pct">--</span></div>
-    </div>
-    
-    <div class="swap-details">
-      <div class="metric-row swap-summary"><span>Swap</span><span class="swap-summary-value"><span id="swap-amount">--</span><span class="swap-summary-percent" id="swap-summary-percent"></span></span></div>
-      <div class="bar-wrap swap-meter" id="swap-wrap" style="display:none;">
-        <div class="bar" id="swap-bar"></div>
-        <div class="bar-text"><span class="swap-meter-label">Swap </span><span id="swap-usage-pct">--</span></div>
-      </div>
     </div>
     
     <svg class="sparkline" id="mem-chart"></svg>
@@ -105,14 +108,16 @@ setTheme(savedTheme);
   <!-- Network & System Card -->
   <div class="card" id="network-card">
     <div class="card-title">Network & System</div>
-    <div class="metric-row"><span>Uptime</span><span id="uptime">--</span></div>
-    <div class="metric-row"><span>Processes</span><span id="procs">--</span></div>
-    
-    <div class="section-title">Traffic</div>
-    <div class="metric-row"><span>Rx</span><span id="net-rx">--</span></div>
-    <div class="metric-row"><span>Tx</span><span id="net-tx">--</span></div>
-    
-    <svg class="sparkline" id="net-chart"></svg>
+    <div class="network-summary">
+      <div class="metric-row"><span>Uptime</span><span id="uptime">--</span></div>
+      <div class="metric-row"><span>Processes</span><span id="procs">--</span></div>
+
+      <div class="section-title">Traffic</div>
+      <div class="metric-row"><span>Rx</span><span id="net-rx">--</span></div>
+      <div class="metric-row"><span>Tx</span><span id="net-tx">--</span></div>
+
+      <svg class="sparkline" id="net-chart"></svg>
+    </div>
   </div>
 
   <!-- Listening Sockets Card -->
@@ -144,10 +149,8 @@ setTheme(savedTheme);
 <div class="updated">Last updated: <span id="updated">--</span></div>
 
 <script>
-// Share the live socket renderer while grouping related information in modern.
-if (document.documentElement.dataset.skin === "modern") {
-  document.getElementById("network-card").appendChild(document.getElementById("sockets-card"));
-}
+// Keep listening sockets with the network metrics in both skins.
+document.getElementById("network-card").appendChild(document.getElementById("sockets-card"));
 function fmt(bytes){
   if(bytes===0)return"0 B";
   const k=1024,s=["B","KB","MB","GB","TB"];
@@ -214,7 +217,8 @@ async function toggleContainerLogs(button, id) {
 }
 function drawSparkline(svgId, data, color, fixedMax) {
     const svg = document.getElementById(svgId);
-    if (!svg || !data || data.length < 2) return;
+    if (!svg || !data || data.length === 0) return;
+    if (data.length === 1) data = [data[0], data[0]];
     // Keep the stroke inside the SVG, including flat runs at 0% or 100%.
     const w = 300, h = 40, inset = 4;
     const max = fixedMax || Math.max(Math.max(...data) * 1.1, 1);
@@ -261,6 +265,7 @@ function connectSSE() {
       setBar("cpu-bar",d.cpu_usage);
       setGauge("cpu-gauge", "cpu-gauge-value", d.cpu_usage);
       document.getElementById("cpu-cores").textContent=d.cpu_count;
+      document.getElementById("cpu-core-label").textContent=d.cpu_count === 1 ? "Core" : "Cores";
       document.getElementById("load-avg").textContent=d.load_avg;
       
       document.getElementById("mem-used").textContent=fmt(d.mem_used);
