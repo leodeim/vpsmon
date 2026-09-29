@@ -58,6 +58,7 @@ Once installed on your VPS, you can manage the monitor using these commands:
 | `MONITOR_PASS_HASH` | (hash of `changeme`) | Web UI password (bcrypt hash) |
 | `MONITOR_SKIN` | `terminal` | Dashboard skin: `terminal` or `modern`; chosen during installation |
 | `MONITOR_NO_AUTH` | `false` | Set to `true`, `yes`, `on`, or `1` to disable the login screen and session checks |
+| `MONITOR_TRUSTED_PROXIES` | `loopback` | Comma-separated IPs/CIDRs allowed to supply client IP via `X-Forwarded-For`/`X-Real-IP` for login rate limiting. `loopback` = `127.0.0.0/8,::1/128`, `*` = trust all, empty = trust none |
 
 ## Reverse Proxy (HTTPS)
 

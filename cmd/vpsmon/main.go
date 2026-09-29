@@ -46,6 +46,12 @@ func main() {
 	skin := envOr("MONITOR_SKIN", "terminal")
 	noAuth := envBool("MONITOR_NO_AUTH")
 
+	if spec, ok := os.LookupEnv("MONITOR_TRUSTED_PROXIES"); ok {
+		if err := api.SetTrustedProxies(spec); err != nil {
+			log.Fatalf("invalid MONITOR_TRUSTED_PROXIES %q: %v", spec, err)
+		}
+	}
+
 	username := ""
 	expectedPassHash := ""
 	if !noAuth {

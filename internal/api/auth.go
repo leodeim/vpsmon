@@ -5,9 +5,100 @@ import (
 	"encoding/hex"
 	"net"
 	"net/http"
+	"net/netip"
+	"strings"
 	"sync"
 	"time"
 )
+
+type proxyConfig struct {
+	all      bool
+	prefixes []netip.Prefix
+}
+
+var trustedProxyConfig = struct {
+	sync.RWMutex
+	config proxyConfig
+}{
+	config: proxyConfig{prefixes: []netip.Prefix{
+		netip.MustParsePrefix("127.0.0.0/8"),
+		netip.MustParsePrefix("::1/128"),
+	}},
+}
+
+// SetTrustedProxies configures which peers may provide forwarded client IPs.
+func SetTrustedProxies(spec string) error {
+	spec = strings.TrimSpace(spec)
+	config := proxyConfig{all: spec == "*"}
+	if spec != "" && !config.all {
+		for _, value := range strings.Split(spec, ",") {
+			value = strings.TrimSpace(value)
+			if value == "" {
+				continue
+			}
+			if strings.EqualFold(value, "loopback") {
+				config.prefixes = append(config.prefixes,
+					netip.MustParsePrefix("127.0.0.0/8"),
+					netip.MustParsePrefix("::1/128"),
+				)
+				continue
+			}
+
+			var prefix netip.Prefix
+			var err error
+			if strings.Contains(value, "/") {
+				prefix, err = netip.ParsePrefix(value)
+			} else {
+				var addr netip.Addr
+				addr, err = netip.ParseAddr(value)
+				if err == nil {
+					addr = addr.WithZone("").Unmap()
+					prefix = netip.PrefixFrom(addr, addr.BitLen())
+				}
+			}
+			if err != nil {
+				return err
+			}
+			config.prefixes = append(config.prefixes, prefix.Masked())
+		}
+	}
+
+	trustedProxyConfig.Lock()
+	trustedProxyConfig.config = config
+	trustedProxyConfig.Unlock()
+	return nil
+}
+
+func currentProxyConfig() proxyConfig {
+	trustedProxyConfig.RLock()
+	config := trustedProxyConfig.config
+	trustedProxyConfig.RUnlock()
+	return config
+}
+
+func (c proxyConfig) contains(ip netip.Addr) bool {
+	if c.all {
+		return true
+	}
+	for _, prefix := range c.prefixes {
+		if prefix.Contains(ip) {
+			return true
+		}
+	}
+	return false
+}
+
+func parseRemoteIP(remoteAddr string) (netip.Addr, bool) {
+	host, _, err := net.SplitHostPort(remoteAddr)
+	if err != nil {
+		host = strings.Trim(strings.TrimSpace(remoteAddr), "[]")
+	}
+	ip, err := netip.ParseAddr(host)
+	if err != nil {
+		return netip.Addr{}, false
+	}
+	return ip.WithZone("").Unmap(), true
+}
 
 // --- Rate Limiting ---
 type loginAttempt struct {
@@ -21,14 +112,39 @@ var (
 )
 
 func getIP(r *http.Request) string {
-	ip := r.Header.Get("X-Forwarded-For")
-	if ip == "" {
-		ip = r.Header.Get("X-Real-IP")
+	peer, ok := parseRemoteIP(r.RemoteAddr)
+	if !ok {
+		if host, _, err := net.SplitHostPort(r.RemoteAddr); err == nil {
+			return strings.TrimSpace(host)
+		}
+		return strings.TrimSpace(r.RemoteAddr)
 	}
-	if ip == "" {
-		ip, _, _ = net.SplitHostPort(r.RemoteAddr)
+
+	config := currentProxyConfig()
+	if !config.contains(peer) {
+		return peer.String()
 	}
-	return ip
+
+	parts := strings.Split(strings.Join(r.Header.Values("X-Forwarded-For"), ","), ",")
+	var forwarded netip.Addr
+	for i := len(parts) - 1; i >= 0; i-- {
+		ip, err := netip.ParseAddr(strings.TrimSpace(parts[i]))
+		if err != nil {
+			continue
+		}
+		forwarded = ip.WithZone("").Unmap()
+		if !config.contains(forwarded) {
+			return forwarded.String()
+		}
+	}
+	if forwarded.IsValid() {
+		return forwarded.String()
+	}
+
+	if ip, err := netip.ParseAddr(strings.TrimSpace(r.Header.Get("X-Real-IP"))); err == nil {
+		return ip.WithZone("").Unmap().String()
+	}
+	return peer.String()
 }
 
 func rateLimit(ip string) bool {
