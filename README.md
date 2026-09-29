@@ -30,12 +30,12 @@ curl -sL https://raw.githubusercontent.com/leodeim/vpsmon/main/scripts/install.s
 
 ### Terminal
 <p align="center">
-  <img src="misc/screenshot.png" width="600" alt="vpsmon Screenshot">
+  <img src="misc/screenshot.png" width="900" alt="vpsmon terminal dashboard with CPU, memory, and network cards">
 </p>
 
 ### Modern
 <p align="center">
-  <img src="misc/screenshot-modern.png" width="600" alt="vpsmon Screenshot">
+  <img src="misc/screenshot-modern.png" width="900" alt="vpsmon modern dashboard with CPU, memory, and network cards">
 </p>
 
 ## Useful Commands
