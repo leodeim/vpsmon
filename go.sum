@@ -1,2 +1,4 @@
+github.com/leodeim/vpsmonlib v0.0.1 h1:G5b+mUykP+0kGHtTYSiCXdcyHgWgyaN8E25XRr/uUUQ=
+github.com/leodeim/vpsmonlib v0.0.1/go.mod h1:xlGr9gFg4JGK5q4xcJInbw/qsalnHhFSvJA9TAxFOBA=
 golang.org/x/crypto v0.54.0 h1:YLIA59K4fiNzHzjnZt2tUJQjQtUWfWbeHBqKtk3eScw=
 golang.org/x/crypto v0.54.0/go.mod h1:KWL8ny2AZdGR2cWmzeHrp2azQPGogOv+HeQaVEXC2dk=

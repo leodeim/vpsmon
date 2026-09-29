@@ -10,7 +10,7 @@ import (
 	"golang.org/x/crypto/bcrypt"
 
 	"vpsmon/internal/api"
-	"vpsmon/internal/metrics"
+	"github.com/leodeim/vpsmonlib/metrics"
 )
 
 func envOr(key, fallback string) string {

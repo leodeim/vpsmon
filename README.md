@@ -20,6 +20,10 @@
 - **Built-in Security:** Password-protected Web UI (bcrypt) with login rate-limiting, optionally disabled for trusted networks or authenticating proxies
 - **Ultra Lightweight:** Single Go binary with zero dependencies and ~5MB RAM footprint
 
+`vpsmon` is a local dashboard. It contains no Cloud uploader and never sends metrics to VPSmon Cloud. The separate [vpsagent](https://github.com/leodeim/vpsagent) provides opt-in Cloud monitoring. Both programs use the open-source [vpsmonlib](https://github.com/leodeim/vpsmonlib) collector.
+
+Source builds use the published `vpsmonlib` Go module.
+
 ## Installation
 
 ```bash

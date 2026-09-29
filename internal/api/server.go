@@ -13,7 +13,7 @@ import (
 
 	"golang.org/x/crypto/bcrypt"
 
-	"vpsmon/internal/metrics"
+	"github.com/leodeim/vpsmonlib/metrics"
 	"vpsmon/misc"
 )
 
