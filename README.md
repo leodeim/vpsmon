@@ -58,7 +58,9 @@ Once installed on your VPS, you can manage the monitor using these commands:
 | `MONITOR_PASS_HASH` | (hash of `changeme`) | Web UI password (bcrypt hash) |
 | `MONITOR_SKIN` | `terminal` | Dashboard skin: `terminal` or `modern`; chosen during installation |
 | `MONITOR_NO_AUTH` | `false` | Set to `true`, `yes`, `on`, or `1` to disable the login screen and session checks |
-| `MONITOR_TRUSTED_PROXIES` | `loopback` | Comma-separated IPs/CIDRs allowed to supply client IP via `X-Forwarded-For`/`X-Real-IP` for login rate limiting. `loopback` = `127.0.0.0/8,::1/128`, `*` = trust all, empty = trust none |
+| `MONITOR_TRUSTED_PROXIES` | `loopback` | Comma-separated proxy IPs/CIDRs allowed to supply client IP via `X-Forwarded-For`/`X-Real-IP` for login rate limiting. `loopback` = `127.0.0.0/8,::1/128`; empty = trust none. Avoid `*` (trust all), which allows IP spoofing. |
+
+Existing direct installations and local Caddy setups using `reverse_proxy 127.0.0.1:8088` need no configuration change. If a reverse proxy connects from another IP or container, add its source IP or CIDR (for example, `MONITOR_TRUSTED_PROXIES=loopback,10.0.0.4`). Include `loopback` if you also use a local proxy. Without the setting, visitors behind that proxy share one login rate limit: five submissions within five minutes. For a systemd installation, edit `/opt/vpsmon/.env` and restart the service. For Docker Compose, set the variable in the Compose `.env` file and recreate the container.
 
 ## Reverse Proxy (HTTPS)
 

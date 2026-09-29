@@ -15,6 +15,8 @@ services:
       - MONITOR_NO_AUTH=${MONITOR_NO_AUTH:-false}
       # Choose terminal (default) or modern; this is fixed for all dashboard visitors.
       - MONITOR_SKIN=${MONITOR_SKIN:-terminal}
+      # Add the source IP/CIDR of any reverse proxy outside this container.
+      - MONITOR_TRUSTED_PROXIES=${MONITOR_TRUSTED_PROXIES-loopback}
     volumes:
       # Required for Docker container metadata, stats, and on-demand logs.
       - /var/run/docker.sock:/var/run/docker.sock:ro
