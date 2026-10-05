@@ -4,5 +4,7 @@ github.com/vpsmon/vpsmonlib v0.0.3 h1:6F/1jlxhKRO/2QisJA1B7ZX3zl98nnz4BMl1kZJ+pb
 github.com/vpsmon/vpsmonlib v0.0.3/go.mod h1:KIfiXiUApitUaAAa3TgwdKnuPNMEs8q5j2OJ48RzDfI=
 github.com/vpsmon/vpsmonlib v0.0.4 h1:YGWvwxWtButbzio30PIVUo+FZ7pslntlk65Dr+gZwyk=
 github.com/vpsmon/vpsmonlib v0.0.4/go.mod h1:KIfiXiUApitUaAAa3TgwdKnuPNMEs8q5j2OJ48RzDfI=
+github.com/vpsmon/vpsmonlib v0.0.5 h1:TM3AiaTrHALZQdVnRKgfCk73m0LIc303d+Ua/kpcHg0=
+github.com/vpsmon/vpsmonlib v0.0.5/go.mod h1:KIfiXiUApitUaAAa3TgwdKnuPNMEs8q5j2OJ48RzDfI=
 golang.org/x/crypto v0.54.0 h1:YLIA59K4fiNzHzjnZt2tUJQjQtUWfWbeHBqKtk3eScw=
 golang.org/x/crypto v0.54.0/go.mod h1:KWL8ny2AZdGR2cWmzeHrp2azQPGogOv+HeQaVEXC2dk=
