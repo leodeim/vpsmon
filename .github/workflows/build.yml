@@ -48,9 +48,10 @@ jobs:
       - name: Build release binaries
         env:
           CGO_ENABLED: "0"
+          GOARM: "6"
         run: |
           mkdir -p dist
-          for target in darwin/amd64 darwin/arm64 linux/amd64 linux/arm64; do
+          for target in darwin/amd64 darwin/arm64 linux/amd64 linux/arm64 linux/arm linux/386; do
             os=${target%/*}
             arch=${target#*/}
             GOOS="$os" GOARCH="$arch" go build -trimpath -ldflags="-s -w" -o "dist/vpsmon-${os}-${arch}" ./cmd/vpsmon

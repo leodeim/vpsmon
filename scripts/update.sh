@@ -33,9 +33,12 @@ fi
 # Determine architecture
 ARCH=$(uname -m)
 case $ARCH in
-    x86_64) GOARCH="amd64" ;;
-    aarch64) GOARCH="arm64" ;;
-    armv8l) GOARCH="arm64" ;;
+    x86_64)
+        if [[ $(getconf LONG_BIT) == 32 ]]; then GOARCH="386"; else GOARCH="amd64"; fi ;;
+    i386|i486|i586|i686) GOARCH="386" ;;
+    aarch64)
+        if [[ $(getconf LONG_BIT) == 32 ]]; then GOARCH="arm"; else GOARCH="arm64"; fi ;;
+    armv6l|armv7l|armv8l) GOARCH="arm" ;;
     *) echo "Unsupported architecture: $ARCH"; exit 1 ;;
 esac
 
