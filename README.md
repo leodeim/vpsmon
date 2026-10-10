@@ -1,5 +1,18 @@
 <p align="center">
-  <img src="misc/logo.png" width="400" alt="vpsmon Logo">
+  <img src="misc/logo.png" width="320" alt="vpsmon">
+</p>
+
+<p align="center">
+  <strong>Lightweight, self-hosted VPS monitoring.</strong><br>
+  Installed directly on VPS.<br/>
+  Live system metrics, containers, processes, disks, network, and listening sockets in one web dashboard.
+</p>
+
+<p align="center">
+  <a href="#installation">Install</a> ·
+  <a href="#features">Features</a> ·
+  <a href="#configuration">Configuration</a> ·
+  <a href="#themes">Themes</a>
 </p>
 
 <p align="center">
@@ -7,6 +20,10 @@
   <a href="https://github.com/leodeim/vpsmon/releases/latest"><img src="https://img.shields.io/github/v/release/leodeim/vpsmon" alt="Latest Release"></a>
   <a href="https://github.com/leodeim/vpsmon/releases"><img src="https://img.shields.io/github/downloads/leodeim/vpsmon/total" alt="Downloads"></a>
   <a href="https://github.com/leodeim/vpsmon/blob/main/LICENSE"><img src="https://img.shields.io/github/license/leodeim/vpsmon" alt="License"></a>
+</p>
+
+<p align="center">
+  <img src="misc/screenshot-modern.png" width="900" alt="Modern vpsmon dashboard showing live CPU, memory, network, and listening socket data">
 </p>
 
 ## Features
@@ -30,14 +47,10 @@ curl -sL https://raw.githubusercontent.com/leodeim/vpsmon/main/scripts/install.s
 
 ## Themes
 
-### Terminal
+The dashboard above uses the **Modern** theme. The **Terminal** theme is also available:
+
 <p align="center">
   <img src="misc/screenshot.png" width="900" alt="vpsmon terminal dashboard with CPU, memory, and network cards">
-</p>
-
-### Modern
-<p align="center">
-  <img src="misc/screenshot-modern.png" width="900" alt="vpsmon modern dashboard with CPU, memory, and network cards">
 </p>
 
 ## Useful Commands
@@ -51,7 +64,9 @@ Once installed on your VPS, you can manage the monitor using these commands:
 - **Edit configuration:** `sudo nano /opt/vpsmon/.env` (Restart required after changing port or credentials)
 - **Uninstall:** `sudo bash /opt/vpsmon/uninstall.sh`
 
-## Environment Variables
+## Configuration
+
+### Environment Variables
 
 | Variable | Default | Description |
 |---|---|---|
