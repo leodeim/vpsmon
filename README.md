@@ -23,6 +23,10 @@
 </p>
 
 <p align="center">
+  For multi-server monitoring with vpsagent, see <a href="https://vpsmon.cloud">vpsmon.cloud</a>.
+</p>
+
+<p align="center">
   <img src="misc/screenshot-modern.png" width="900" alt="Modern vpsmon dashboard showing live CPU, memory, network, and listening socket data">
 </p>
 
