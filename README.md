@@ -1,3 +1,7 @@
+<p align="right">
+  <a href="https://buymeacoffee.com/leodeim"><img src="https://img.shields.io/badge/Buy_Me_a_Coffee-Support_My_Work-yellow?logo=buymeacoffee" alt="buymeacoffee"></a>
+</p>
+
 <p align="center">
   <img src="misc/logo.png" width="320" alt="vpsmon">
 </p>
@@ -20,10 +24,6 @@
   <a href="https://github.com/leodeim/vpsmon/releases/latest"><img src="https://img.shields.io/github/v/release/leodeim/vpsmon" alt="Latest Release"></a>
   <a href="https://github.com/leodeim/vpsmon/releases"><img src="https://img.shields.io/github/downloads/leodeim/vpsmon/total" alt="Downloads"></a>
   <a href="https://github.com/leodeim/vpsmon/blob/main/LICENSE"><img src="https://img.shields.io/github/license/leodeim/vpsmon" alt="License"></a>
-</p>
-
-<p align="center">
-  <a href="https://buymeacoffee.com/leodeim"><img src="https://img.shields.io/badge/Buy_Me_a_Coffee-Support_My_Work-yellow?logo=buymeacoffee" alt="buymeacoffee"></a>
 </p>
 
 <p align="center">
