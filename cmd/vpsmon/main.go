@@ -56,8 +56,10 @@ func main() {
 	expectedPassHash := ""
 	if !noAuth {
 		username = envOr("MONITOR_USER", "admin")
-		defaultHash, _ := bcrypt.GenerateFromPassword([]byte("changeme"), bcrypt.DefaultCost)
-		expectedPassHash = envOr("MONITOR_PASS_HASH", string(defaultHash))
+		expectedPassHash = os.Getenv("MONITOR_PASS_HASH")
+		if expectedPassHash == "" {
+			log.Fatal("MONITOR_PASS_HASH is required: generate one with 'vpsmon -hash <password>', or set MONITOR_NO_AUTH=true if access is protected another way")
+		}
 	}
 
 	metrics.StartCollector()

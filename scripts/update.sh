@@ -50,12 +50,24 @@ if [ -z "$LATEST_RELEASE_URL" ]; then
     exit 1
 fi
 
+echo "==> Downloading latest binary..."
+ASSET_NAME="${LATEST_RELEASE_URL##*/}"
+CHECKSUMS_URL="${LATEST_RELEASE_URL%/*}/checksums.txt"
+DOWNLOAD_DIR=$(mktemp -d "${REMOTE_DIR}/.download.XXXXXX")
+trap 'rm -rf "${DOWNLOAD_DIR}"' EXIT
+curl -fsSL "$LATEST_RELEASE_URL" -o "${DOWNLOAD_DIR}/${ASSET_NAME}"
+curl -fsSL "$CHECKSUMS_URL" -o "${DOWNLOAD_DIR}/checksums.txt"
+EXPECTED_SHA=$(awk -v name="${ASSET_NAME}" '$2 == name {print $1}' "${DOWNLOAD_DIR}/checksums.txt")
+ACTUAL_SHA=$(sha256sum "${DOWNLOAD_DIR}/${ASSET_NAME}" | awk '{print $1}')
+if [ -z "$EXPECTED_SHA" ] || [ "$EXPECTED_SHA" != "$ACTUAL_SHA" ]; then
+    echo "Error: Checksum verification failed for ${ASSET_NAME}. The current version was left in place."
+    exit 1
+fi
+
 echo "==> Stopping service..."
 systemctl stop "${APP_NAME}" || true
 
-echo "==> Downloading latest binary..."
-curl -sL "$LATEST_RELEASE_URL" -o "${REMOTE_DIR}/${APP_NAME}.tmp"
-mv -f "${REMOTE_DIR}/${APP_NAME}.tmp" "${REMOTE_DIR}/${APP_NAME}"
+mv -f "${DOWNLOAD_DIR}/${ASSET_NAME}" "${REMOTE_DIR}/${APP_NAME}"
 chmod 755 "${REMOTE_DIR}/${APP_NAME}"
 chown "${SERVICE_USER}:${SERVICE_GROUP}" "${REMOTE_DIR}/${APP_NAME}"
 

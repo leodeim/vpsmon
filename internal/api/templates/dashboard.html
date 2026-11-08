@@ -172,9 +172,8 @@ function setGauge(id, valueId, pct) {
   value.textContent = clamped.toFixed(1) + "%";
 }
 function escapeHTML(value) {
-  const element = document.createElement("div");
-  element.textContent = String(value || "—");
-  return element.innerHTML;
+  const entities = { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" };
+  return String(value || "—").replace(/[&<>"']/g, char => entities[char]);
 }
 window.vpsmonOpenContainerLog = { id: null, text: "" };
 function updateOpenContainerLog(id, text) {
@@ -241,7 +240,7 @@ function renderTop(id, procs, isMem) {
     }
     tbody.innerHTML = procs.map(p => `
         <tr>
-            <td style="max-width: 150px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;" title="${p.name}">${p.name}</td>
+            <td style="max-width: 150px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;" title="${escapeHTML(p.name)}">${escapeHTML(p.name)}</td>
             <td class="td-right">${(isMem ? p.mem : p.cpu).toFixed(1)}%</td>
         </tr>
     `).join("");
@@ -423,7 +422,7 @@ function connectSSE() {
         gpuContent.innerHTML = d.gpus.map(g => {
           const memoryPercent = g.memory_total > 0 ? (g.memory_used / g.memory_total) * 100 : 0;
           return `
-            <div class="section-title">${g.name}</div>
+            <div class="section-title">${escapeHTML(g.name)}</div>
             <div class="metric-row"><span>Utilization</span><span>${g.utilization.toFixed(0)}%</span></div>
             <div class="bar-wrap"><div class="bar" style="width:${Math.min(g.utilization, 100)}%"></div><div class="bar-text">GPU ${g.utilization.toFixed(0)}%</div></div>
             <div class="metric-row"><span>VRAM</span><span>${fmt(g.memory_used)} / ${fmt(g.memory_total)}</span></div>

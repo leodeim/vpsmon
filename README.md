@@ -77,7 +77,7 @@ Once installed on your VPS, you can manage the monitor using these commands:
 |---|---|---|
 | `MONITOR_ADDR` | `:8088` | Listen address |
 | `MONITOR_USER` | `admin` | Web UI username |
-| `MONITOR_PASS_HASH` | (hash of `changeme`) | Web UI password (bcrypt hash) |
+| `MONITOR_PASS_HASH` | (required) | Web UI password as a bcrypt hash, generated with `vpsmon -hash <password>`. The server won't start without it unless `MONITOR_NO_AUTH` is enabled. |
 | `MONITOR_SKIN` | `terminal` | Dashboard skin: `terminal` or `modern`; chosen during installation |
 | `MONITOR_NO_AUTH` | `false` | Set to `true`, `yes`, `on`, or `1` to disable the login screen and session checks |
 | `MONITOR_TRUSTED_PROXIES` | `loopback` | Comma-separated proxy IPs/CIDRs allowed to supply client IP via `X-Forwarded-For`/`X-Real-IP` for login rate limiting. `loopback` = `127.0.0.0/8,::1/128`; empty = trust none. Avoid `*` (trust all), which allows IP spoofing. |
