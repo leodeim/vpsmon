@@ -5,7 +5,8 @@
 <p align="center">
   <strong>Lightweight, self-hosted VPS monitoring.</strong><br>
   Installed directly on VPS.<br/>
-  Live system metrics, containers, processes, disks, network, and listening sockets in one web dashboard.
+  Live system metrics, containers, processes, disks, network, and listening sockets in one web dashboard.<br/>
+  <b>For multi-server monitoring with vpsagent, see </b> <a href="https://vpsmon.cloud">vpsmon.cloud</a>.
 </p>
 
 <p align="center">
@@ -23,7 +24,7 @@
 </p>
 
 <p align="center">
-  For multi-server monitoring with vpsagent, see <a href="https://vpsmon.cloud">vpsmon.cloud</a>.
+  <a href="https://buymeacoffee.com/leodeim"><img src="https://img.shields.io/badge/Buy_Me_a_Coffee-Support_My_Work-yellow?logo=buymeacoffee" alt="buymeacoffee"></a>
 </p>
 
 <p align="center">
