@@ -6,6 +6,13 @@ on:
       - "main"
     tags:
       - "v*"
+    # Documentation-only pushes to main do not publish a release. Tag pushes
+    # always run: GitHub does not apply path filters to tags.
+    paths-ignore:
+      - "**.md"
+      - "LICENSE"
+      - "misc/screenshot*.png"
+      - "misc/logo.png"
 
 permissions:
   contents: write
