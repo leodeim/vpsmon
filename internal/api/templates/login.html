@@ -16,6 +16,8 @@ document.documentElement.setAttribute('data-theme', savedTheme);
 <body class="login-page">
 <div class="login-card">
   <div class="card-title"><img class="brand-mark" src="/favicon.ico" alt="">vpsmon</div>
+  <h1 class="login-heading modern-only">Sign in</h1>
+  <p class="login-intro modern-only">Use the credentials set for this server.</p>
   {{LOGIN_ERROR}}
   <form method="post" action="/login">
     <label class="field-label" for="username">Username</label>

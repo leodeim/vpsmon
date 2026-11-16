@@ -12,6 +12,7 @@ button:focus-visible, a:focus-visible { outline: 2px solid var(--link); outline-
 .header-title { display: flex; align-items: center; }
 .controls { display: flex; align-items: center; }
 .overview, .brand-mark { display: none; }
+.modern-only { display: none; }
 .card { display: flex; flex-direction: column; position: relative; min-width: 0; }
 .metric-row { display: flex; justify-content: space-between; margin-bottom: 0.5rem; }
 .swap-summary { gap: 0.75rem; }

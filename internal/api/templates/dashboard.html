@@ -47,76 +47,72 @@ setTheme(savedTheme);
   </div>
 </div>
 
-<div class="overview"><span class="live-label" id="live-label">Connecting</span></div>
+<div class="overview">
+  <h1 class="overview-host" id="overview-host">--</h1>
+  <div class="overview-status"><span class="live-label" id="live-label" data-state="connecting">Connecting</span><span class="overview-updated">Updated <span id="overview-updated">--</span></span></div>
+</div>
 <div class="grid">
   <!-- CPU Card -->
-  <div class="card" id="cpu-card">
-    <div class="card-title">CPU (<span id="cpu-cores">--</span> <span id="cpu-core-label">Cores</span>)</div>
-    <div class="resource-overview">
-      <div class="modern-gauge" id="cpu-gauge" aria-label="CPU usage">
-        <svg viewBox="0 0 120 120" aria-hidden="true"><defs><linearGradient id="cpu-gauge-gradient"><stop stop-color="var(--accent-start)"/><stop offset="1" stop-color="var(--accent-end)"/></linearGradient></defs><circle class="gauge-track" cx="60" cy="60" r="49"/><circle class="gauge-ring" cx="60" cy="60" r="49" pathLength="100" stroke-dasharray="100" stroke-dashoffset="100" style="stroke:url(#cpu-gauge-gradient);visibility:hidden"/></svg>
-        <div class="gauge-content"><strong id="cpu-gauge-value">--</strong><span>CPU USED</span></div>
-      </div>
-      <div class="resource-stats">
-        <div class="metric-row"><span>Load Average</span><span id="load-avg">--</span></div>
-      </div>
+  <div class="card resource-card" id="cpu-card">
+    <div class="card-title"><span class="card-name">CPU</span> <span class="card-meta"><span class="card-paren">(</span><span id="cpu-cores">--</span> <span id="cpu-core-label">Cores</span><span class="card-paren">)</span></span></div>
+    <div class="resource-figure"><strong id="cpu-figure">--</strong><span id="cpu-figure-meta"></span></div>
+    <div class="resource-stats">
+      <div class="metric-row"><span>Load Average</span><span id="load-avg">--</span></div>
     </div>
-    
+
     <div class="bar-wrap terminal-meter" style="margin-top:1rem;">
       <div class="bar" id="cpu-bar"></div>
       <div class="bar-text">CPU <span id="cpu-usage">--</span></div>
     </div>
-    
-    <svg class="sparkline" id="cpu-chart"></svg>
-    
+
+    <div class="chart-plot"><svg class="sparkline" id="cpu-chart" role="img" aria-label="CPU usage over recent samples"></svg></div>
+    <div class="chart-axis"><span class="chart-axis-start">--</span><span>now</span></div>
+
     <div class="section-title">Top CPU</div>
     <table><tbody id="top-cpu"></tbody></table>
   </div>
 
   <!-- Memory Card -->
-  <div class="card" id="memory-card">
-    <div class="card-title">Memory</div>
-    <div class="resource-overview">
-      <div class="modern-gauge" id="mem-gauge" aria-label="Memory usage">
-        <svg viewBox="0 0 120 120" aria-hidden="true"><defs><linearGradient id="mem-gauge-gradient"><stop stop-color="var(--accent-start)"/><stop offset="1" stop-color="var(--accent-end)"/></linearGradient></defs><circle class="gauge-track" cx="60" cy="60" r="49"/><circle class="gauge-ring" cx="60" cy="60" r="49" pathLength="100" stroke-dasharray="100" stroke-dashoffset="100" style="stroke:url(#mem-gauge-gradient);visibility:hidden"/></svg>
-        <div class="gauge-content"><strong id="mem-gauge-value">--</strong><span>RAM USED</span></div>
-      </div>
-      <div class="resource-stats">
-        <div class="metric-row"><span>Used</span><span id="mem-used">--</span></div>
-        <div class="metric-row"><span>Total</span><span id="mem-total">--</span></div>
-        <div class="swap-details">
-          <div class="metric-row swap-summary"><span>Swap</span><span class="swap-summary-value"><span id="swap-amount">--</span><span class="swap-summary-percent" id="swap-summary-percent"></span></span></div>
-          <div class="bar-wrap swap-meter" id="swap-wrap" style="display:none;">
-            <div class="bar" id="swap-bar"></div>
-            <div class="bar-text"><span class="swap-meter-label">Swap </span><span id="swap-usage-pct">--</span></div>
-          </div>
+  <div class="card resource-card" id="memory-card">
+    <div class="card-title"><span class="card-name">Memory</span></div>
+    <div class="resource-figure"><strong id="mem-figure">--</strong><span id="mem-figure-meta"></span></div>
+    <div class="resource-stats">
+      <div class="metric-row"><span>Used</span><span id="mem-used">--</span></div>
+      <div class="metric-row"><span>Total</span><span id="mem-total">--</span></div>
+      <div class="swap-details">
+        <div class="metric-row swap-summary"><span>Swap</span><span class="swap-summary-value"><span id="swap-amount">--</span><span class="swap-summary-percent" id="swap-summary-percent"></span></span></div>
+        <div class="bar-wrap swap-meter" id="swap-wrap" style="display:none;">
+          <div class="bar" id="swap-bar"></div>
+          <div class="bar-text"><span class="swap-meter-label">Swap </span><span id="swap-usage-pct">--</span></div>
         </div>
       </div>
     </div>
-    
+
     <div class="bar-wrap terminal-meter" style="margin-top:1rem;">
       <div class="bar" id="mem-bar"></div>
       <div class="bar-text">RAM <span id="mem-usage-pct">--</span></div>
     </div>
-    
-    <svg class="sparkline" id="mem-chart"></svg>
-    
+
+    <div class="chart-plot"><svg class="sparkline" id="mem-chart" role="img" aria-label="Memory usage over recent samples"></svg></div>
+    <div class="chart-axis"><span class="chart-axis-start">--</span><span>now</span></div>
+
     <div class="section-title">Top Memory</div>
     <table><tbody id="top-mem"></tbody></table>
   </div>
 
   <!-- Network & System Card -->
-  <div class="card" id="network-card">
-    <div class="card-title">Network & System</div>
+  <div class="card resource-card" id="network-card">
+    <div class="card-title"><span class="card-name">Network &amp; System</span></div>
     <div class="network-summary">
       <div class="metric-row"><span>Uptime</span><span id="uptime">--</span></div>
       <div class="metric-row"><span>Processes</span><span id="procs">--</span></div>
 
       <div class="section-title">Traffic</div>
-      <div class="metric-row"><span>Rx</span><span id="net-rx">--</span></div>
-      <div class="metric-row"><span>Tx</span><span id="net-tx">--</span></div>
+      <div class="metric-row net-rx-row"><span><span class="terminal-only">Rx</span><span class="modern-only">Download</span></span><span id="net-rx">--</span></div>
+      <div class="metric-row net-tx-row"><span><span class="terminal-only">Tx</span><span class="modern-only">Upload</span></span><span id="net-tx">--</span></div>
 
-      <svg class="sparkline" id="net-chart"></svg>
+      <div class="chart-plot"><svg class="sparkline" id="net-chart" role="img" aria-label="Network traffic over recent samples"></svg></div>
+      <div class="chart-axis"><span class="chart-axis-start">--</span><span>now</span></div>
     </div>
   </div>
 
@@ -161,15 +157,30 @@ function setBar(id,pct){
   const el=document.getElementById(id);
   if (el) el.style.width=Math.min(pct,100)+"%";
 }
-function setGauge(id, valueId, pct) {
-  const gauge = document.getElementById(id);
-  const value = document.getElementById(valueId);
-  if (!gauge || !value) return;
-  const clamped = Math.min(Math.max(pct || 0, 0), 100);
-  const ring = gauge.querySelector(".gauge-ring");
-  ring.setAttribute('stroke-dashoffset', String(100 - clamped));
-  ring.style.visibility = clamped === 0 ? 'hidden' : 'visible';
-  value.textContent = clamped.toFixed(1) + "%";
+// Usage severity only colours readings; vpsmon itself does not raise alerts.
+function usageSeverity(pct, warnAt, criticalAt) {
+  if (criticalAt && pct >= criticalAt) return "critical";
+  if (warnAt && pct >= warnAt) return "warning";
+  return "";
+}
+function setFigure(id, metaId, series) {
+  const value = document.getElementById(id);
+  const meta = document.getElementById(metaId);
+  if (!value || !series.length) return;
+  const current = Math.min(Math.max(series[series.length - 1] || 0, 0), 100);
+  value.textContent = current.toFixed(1) + "%";
+  value.dataset.severity = usageSeverity(current, 0, 90);
+  if (meta) {
+    const peak = Math.max(...series);
+    const avg = series.reduce((sum, v) => sum + v, 0) / series.length;
+    meta.textContent = `avg ${avg.toFixed(0)}% · peak ${peak.toFixed(0)}%`;
+  }
+}
+function formatSpan(ms) {
+  const minutes = Math.round(ms / 60000);
+  if (minutes < 1) return `${Math.max(Math.round(ms / 1000), 0)}s ago`;
+  if (minutes < 60) return `${minutes}m ago`;
+  return `${Math.round(minutes / 60)}h ago`;
 }
 function escapeHTML(value) {
   const entities = { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" };
@@ -214,22 +225,46 @@ async function toggleContainerLogs(button, id) {
     updateOpenContainerLog(id, "Unable to load logs.");
   }
 }
-function drawSparkline(svgId, data, color, fixedMax) {
+// series: [{ key, data, color, fill }]. Skins may recolour a series through
+// .chart-line-<key> and .chart-stop-<key>, so theme changes apply at once.
+// The modern skin adds grid lines and a soft
+// area under filled series; the terminal skin keeps its single plain line.
+function drawSparkline(svgId, series, fixedMax) {
     const svg = document.getElementById(svgId);
-    if (!svg || !data || data.length === 0) return;
-    if (data.length === 1) data = [data[0], data[0]];
+    if (!svg || !series.length || !series[0].data.length) return;
+    const modern = document.documentElement.dataset.skin === "modern";
     // Keep the stroke inside the SVG, including flat runs at 0% or 100%.
-    const w = 300, h = 40, inset = 4;
-    const max = fixedMax || Math.max(Math.max(...data) * 1.1, 1);
-    const pts = data.map((val, i) => {
-      const x = inset + (i / (data.length - 1)) * (w - 2 * inset);
-      const ratio = Math.min(Math.max(val / max, 0), 1);
-      const y = inset + (1 - ratio) * (h - 2 * inset);
-      return `${x},${y}`;
-    }).join(" ");
+    const w = 300, h = modern ? 92 : 40, inset = modern ? 2 : 4;
+    const peak = Math.max(...series.flatMap(s => s.data));
+    const max = fixedMax || Math.max(peak * 1.1, 1);
+    const points = data => {
+      if (data.length === 1) data = [data[0], data[0]];
+      return data.map((val, i) => {
+        const x = (modern ? 0 : inset) + (i / (data.length - 1)) * (w - (modern ? 0 : 2 * inset));
+        const ratio = Math.min(Math.max(val / max, 0), 1);
+        return [x, inset + (1 - ratio) * (h - 2 * inset)];
+      });
+    };
+    let markup = "";
+    if (modern) {
+      markup += [0, 0.5, 1].map(r => {
+        const y = inset + r * (h - 2 * inset);
+        return `<line class="chart-grid${r === 0.5 ? " faint" : ""}" x1="0" x2="${w}" y1="${y}" y2="${y}" vector-effect="non-scaling-stroke" />`;
+      }).join("");
+    }
+    series.forEach((s, index) => {
+      const pts = points(s.data);
+      const line = pts.map(p => p.join(",")).join(" ");
+      if (modern && s.fill) {
+        const id = `${svgId}-fill-${index}`;
+        const area = `M${pts[0][0]},${h} L${line.replace(/ /g, " L")} L${pts[pts.length - 1][0]},${h} Z`;
+        markup += `<defs><linearGradient id="${id}" x1="0" y1="0" x2="0" y2="1"><stop class="chart-stop-${s.key}" offset="0" stop-color="${s.color}" stop-opacity="0.32"/><stop class="chart-stop-${s.key}" offset="1" stop-color="${s.color}" stop-opacity="0"/></linearGradient></defs><path d="${area}" fill="url(#${id})" stroke="none" />`;
+      }
+      markup += `<polyline class="chart-line chart-line-${s.key}" fill="none" stroke="${s.color}" stroke-width="${modern && !s.fill ? 1.25 : 1.5}" stroke-linecap="round" stroke-linejoin="round" vector-effect="non-scaling-stroke"${s.opacity ? ` stroke-opacity="${s.opacity}"` : ""} points="${line}" />`;
+    });
     svg.setAttribute("viewBox", `0 0 ${w} ${h}`);
     svg.setAttribute("preserveAspectRatio", "none");
-    svg.innerHTML = `<polyline fill="none" stroke="${color}" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" vector-effect="non-scaling-stroke" points="${pts}" />`;
+    svg.innerHTML = markup;
 }
 function renderTop(id, procs, isMem) {
     const tbody = document.getElementById(id);
@@ -252,7 +287,9 @@ function connectSSE() {
   
   evtSource.onmessage = function(event) {
     document.getElementById("offline-banner").style.display = "none";
-    document.getElementById("live-label").textContent = "● Live metrics";
+    const liveLabel = document.getElementById("live-label");
+    liveLabel.textContent = "Live metrics";
+    liveLabel.dataset.state = "live";
     try {
       const history = JSON.parse(event.data);
       if(history.length === 0) return;
@@ -260,18 +297,20 @@ function connectSSE() {
       const d = history[history.length-1];
       
       document.getElementById("hostname").textContent=d.hostname;
+      document.getElementById("overview-host").textContent=d.hostname || "vpsmon";
+      document.title = d.hostname ? `${d.hostname} · vpsmon` : "vpsmon";
       document.getElementById("cpu-usage").textContent=d.cpu_usage.toFixed(2)+"%";
       setBar("cpu-bar",d.cpu_usage);
-      setGauge("cpu-gauge", "cpu-gauge-value", d.cpu_usage);
+      setFigure("cpu-figure", "cpu-figure-meta", history.map(m => m.cpu_usage));
       document.getElementById("cpu-cores").textContent=d.cpu_count;
       document.getElementById("cpu-core-label").textContent=d.cpu_count === 1 ? "Core" : "Cores";
-      document.getElementById("load-avg").textContent=d.load_avg;
+      document.getElementById("load-avg").textContent=d.load_avg || "—";
       
       document.getElementById("mem-used").textContent=fmt(d.mem_used);
       document.getElementById("mem-total").textContent=fmt(d.mem_total);
       document.getElementById("mem-usage-pct").textContent=d.mem_percent.toFixed(2)+"%";
       setBar("mem-bar",d.mem_percent);
-      setGauge("mem-gauge", "mem-gauge-value", d.mem_percent);
+      setFigure("mem-figure", "mem-figure-meta", history.map(m => m.mem_percent));
       
       const swapWrap = document.getElementById("swap-wrap");
       if(d.swap_total>0){
@@ -286,7 +325,7 @@ function connectSSE() {
         document.getElementById("swap-summary-percent").textContent="";
       }
       
-      document.getElementById("uptime").textContent=d.uptime;
+      document.getElementById("uptime").textContent=d.uptime || "—";
       document.getElementById("procs").textContent=d.processes;
       document.getElementById("net-rx").textContent=fmt(d.net_rx_speed) + "/s";
       document.getElementById("net-tx").textContent=fmt(d.net_tx_speed) + "/s";
@@ -357,6 +396,8 @@ function connectSSE() {
             stats.appendChild(stat);
           });
 
+          const severity = usageSeverity(disk.percent, 80, 90);
+          row.dataset.severity = severity;
           const barWrap = document.createElement("div");
           barWrap.className = "bar-wrap";
           barWrap.style.height = "1rem";
@@ -372,7 +413,7 @@ function connectSSE() {
 
           const usage = document.createElement("div");
           usage.className = "disk-usage";
-          usage.textContent = `${disk.percent.toFixed(1)}% used`;
+          usage.textContent = `${disk.percent.toFixed(1)}%`;
           row.append(mount, stats, barWrap, usage);
           diskList.appendChild(row);
         });
@@ -434,14 +475,23 @@ function connectSSE() {
         gpuCard.style.display = "none";
       }
 
-      document.getElementById("updated").textContent=new Date(d.timestamp).toLocaleTimeString();
-      
+      const updatedAt = new Date(d.timestamp).toLocaleTimeString();
+      document.getElementById("updated").textContent = updatedAt;
+      document.getElementById("overview-updated").textContent = updatedAt;
+      const spanLabel = formatSpan(new Date(d.timestamp) - new Date(history[0].timestamp));
+      document.querySelectorAll(".chart-axis-start").forEach(el => { el.textContent = spanLabel; });
+
       const style = getComputedStyle(document.documentElement);
-      const chartColor = style.getPropertyValue('--accent-end').trim() || 'blue';
-      
-      drawSparkline("cpu-chart", history.map(m => m.cpu_usage), chartColor, 100);
-      drawSparkline("mem-chart", history.map(m => m.mem_percent), chartColor, 100);
-      drawSparkline("net-chart", history.map(m => m.net_rx_speed), chartColor);
+      const color = (name) => style.getPropertyValue(name).trim();
+      const chartColor = color('--accent-end') || 'blue';
+
+      drawSparkline("cpu-chart", [{ key: "cpu", data: history.map(m => m.cpu_usage), color: color('--cpu') || chartColor, fill: true }], 100);
+      drawSparkline("mem-chart", [{ key: "memory", data: history.map(m => m.mem_percent), color: color('--memory') || chartColor, fill: true }], 100);
+      const netSeries = [{ key: "network", data: history.map(m => m.net_rx_speed), color: color('--network') || chartColor, fill: true }];
+      if (document.documentElement.dataset.skin === "modern") {
+        netSeries.push({ key: "network-tx", data: history.map(m => m.net_tx_speed), color: color('--network-tx') || chartColor });
+      }
+      drawSparkline("net-chart", netSeries);
       
     } catch(e) {
       console.error(e);
@@ -451,7 +501,9 @@ function connectSSE() {
   evtSource.onerror = async function(err) {
     console.error("SSE error", err);
     document.getElementById("offline-banner").style.display = "block";
-    document.getElementById("live-label").textContent = "Reconnecting";
+    const liveLabel = document.getElementById("live-label");
+    liveLabel.textContent = "Reconnecting";
+    liveLabel.dataset.state = "reconnecting";
     
     try {
       const r = await fetch("/");
